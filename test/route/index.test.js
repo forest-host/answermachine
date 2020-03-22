@@ -12,7 +12,7 @@ describe("Index", () => {
       let res = await chai.request(server).get('/v1');
 
       assert.equal(res.status, 200);
-      assert.deepEqual(res.body, { 'say': 'hi' });
+      assert.isNotNull(res.body.defaults);
     });
   });
 });
