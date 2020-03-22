@@ -5,7 +5,7 @@ import cors from 'cors';
 import { origin } from 'config';
 
 // import routes
-import v1 from './v1';
+import v1 from './route/v1';
 
 const app = express();
 
