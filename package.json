@@ -7,7 +7,7 @@
     "test": "NODE_ENV=testing mocha --require @babel/register --bail --full-trace test/**/*.test.js",
     "start": "node lib/index.js",
     "build": "babel src -d lib",
-    "docs": "apidoc -i lib && echo 'To open docs, open ./doc/index.html in your browser.'"
+    "docs": "apidoc -i src && echo 'To open docs, open ./doc/index.html in your browser.'"
   },
   "repository": {
     "type": "git",
@@ -21,24 +21,25 @@
     ]
   },
   "dependencies": {
+    "@symptotrack/questions": "^0.1.2",
     "body-parser": "^1.19.0",
+    "bookshelf": "^1.1.0",
     "config": "^3.3.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "knex": "^0.20.11",
-    "bookshelf": "^1.1.0",
-    "morgan": "^1.9.1",
+    "knex": "^0.20.12",
+    "morgan": "^1.10.0",
     "mysql": "^2.18.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
-    "@babel/core": "^7.8.7",
-    "@babel/plugin-transform-modules-commonjs": "^7.8.3",
-    "@babel/register": "^7.8.6",
-    "apidoc": "^0.20.0",
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.9.0",
+    "@babel/register": "^7.9.0",
+    "apidoc": "^0.20.1",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "chai-http": "^4.3.0",
-    "mocha": "^7.1.0"
+    "mocha": "^7.1.1"
   }
 }
