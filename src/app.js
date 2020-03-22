@@ -2,7 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
 import cors from 'cors';
-import { origin } from 'config';
+import { express as config } from 'config';
 
 // import routes
 import v1 from './route/v1';
@@ -11,7 +11,7 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({ origin: origin }));
+app.use(cors({ origin: config.origin }));
 
 // Setup a logger when we are not testing to keep track of http traffic
 if(process.env.NODE_ENV != 'testing') {

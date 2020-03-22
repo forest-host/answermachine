@@ -1,6 +1,17 @@
 {
-  "origin": "http://localhost",
-  "server": {
-    "port": 3001
+  "express": {
+    "origin": "http://localhost",
+    "server": {
+      "port": 3001
+    }
+  },
+  "knex": {
+    "client": "mysql",
+    "connection": {
+      "host": "127.0.0.1",
+      "user": "answermachine",
+      "password": "answermachine",
+      "database": "answermachine"
+    }
   }
 }
