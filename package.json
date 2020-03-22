@@ -4,7 +4,7 @@
   "description": "API for Symptotrack.com",
   "main": "lib/index.js",
   "scripts": {
-    "test": "NODE_ENV=testing mocha --require @babel/register --bail --full-trace",
+    "test": "NODE_ENV=testing mocha --require @babel/register --bail --full-trace test/**/*.test.js",
     "start": "node lib/index.js",
     "build": "babel src -d lib",
     "docs": "apidoc -i lib && echo 'To open docs, open ./doc/index.html in your browser.'"
