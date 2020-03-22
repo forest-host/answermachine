@@ -1,0 +1,6 @@
+{
+  "origin": "http://localhost",
+  "server": {
+    "port": 3001
+  }
+}
