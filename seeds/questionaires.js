@@ -2,14 +2,46 @@
 import * as questions from '@symptotrack/questions';
 import models from '../src/models';
 
-const seed_questionaire = function(knex, questionaire, defaults) {
-  console.log(questionaire, defaults);
+// Unique value filter
+const unique = function(value, index, array) {
+  return array.indexOf(value) === index;
+}
+
+// Get question type strings from questionaires
+const get_question_types = function(questionaires) {
+  return Object
+    .keys(questionaires)
+    .flatMap(name => {
+      let questionaire = questionaires[name].config;
+
+      return Object.keys(questionaire.groups).flatMap(name => {
+        let group = questionaire.groups[name];
+
+        return Object.keys(group).map(name => {
+          let question = group[name];
+          return question.type;
+        })
+      })
+    })
+    .filter(unique);
 }
 
 exports.seed = function(knex) {
-  return Promise.all(Object.keys(questions.questionaires).map(async name => {
-    let questionaire = await new models.Questionaire({ name }).save();
+  // TODO - Add question types
 
-    //return seed_questionaire(knex, questions.questionaires[name])
+  console.log();
+
+  return Promise.all(Object.keys(questions.questionaires).map(async name => {
+    // When questions seem to be changing, add questions as many to many to questionaire and
+    // add a new questionaire revision with new questions
+    let [questionaire, question_types] = await Promise.all([
+      models.Questionaire.find_or_create({ name }),
+      get_question_types(questions.questionaires).map(name => models.QuestionType.find_or_create({ name })),
+    ]);
+
+    // TODO - Add questions
+
+    // TODO - Add question select option
+
   }))
 };
