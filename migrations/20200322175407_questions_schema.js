@@ -3,6 +3,7 @@ exports.up = async function(knex) {
   await Promise.all([
     knex.schema.createTable('questionaires', table => {
       table.increments();
+      table.integer('revision');
       table.string('name');
     }),
     knex.schema.createTable('question_types', table => {
@@ -15,15 +16,20 @@ exports.up = async function(knex) {
   await knex.schema.createTable('questions', table => {
     table.increments();
     table.string('name');
-    table.boolean('required');
     table.integer('question_type_id').unsigned().references('question_types.id').onDelete('restrict');
   });
 
-  await knex.schema.createTable('question_select_options', table => {
-    table.increments();
-    table.string('name');
-    table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');
-  });
+  await Promise.all([
+    knex.schema.createTable('questionaires_questions', table => {
+      table.integer('questionaire_id').unsigned().references('questionaires.id').onDelete('restrict');
+      table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');
+    }),
+    knex.schema.createTable('question_select_options', table => {
+      table.increments();
+      table.string('name');
+      table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');
+    }),
+  ])
 };
 
 exports.down = function(knex) {
