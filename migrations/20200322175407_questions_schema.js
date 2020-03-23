@@ -24,7 +24,7 @@ exports.up = async function(knex) {
       table.integer('questionaire_id').unsigned().references('questionaires.id').onDelete('restrict');
       table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');
     }),
-    knex.schema.createTable('question_select_options', table => {
+    knex.schema.createTable('question_options', table => {
       table.increments();
       table.string('name');
       table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');

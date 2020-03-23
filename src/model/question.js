@@ -12,7 +12,7 @@ export default Model.extend({
     return this.belongsTo('QuestionType');
   },
 
-  question_select_options: function() {
-    return this.hasMany('QuestionSelectOption');
+  question_options: function() {
+    return this.hasMany('QuestionOption');
   },
 })

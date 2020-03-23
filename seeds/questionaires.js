@@ -70,7 +70,7 @@ exports.seed = async function(knex) {
 
         // Create question option models
         await Promise.all(options.map(name => {
-          return models.QuestionSelectOption.find_or_create({ name, question_id: question.get('id') });
+          return models.QuestionOption.find_or_create({ name, question_id: question.get('id') });
         }));
       }
 
