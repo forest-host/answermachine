@@ -33,8 +33,6 @@ const find_or_create_question_types = async function(question_types_data) {
 }
 
 exports.seed = async function(knex) {
-  // TODO - Add question types
-
   let question_types = await find_or_create_question_types(get_question_types(questionaires));
 
   return Promise.all(Object.keys(questionaires).map(async name => {
@@ -91,6 +89,5 @@ exports.seed = async function(knex) {
         return knex('questionaires_questions').insert(data);
       }
     }))
-    
   }));
 };
