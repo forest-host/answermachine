@@ -1,3 +1,4 @@
+
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 chai.use(chaiHttp);
@@ -7,6 +8,16 @@ import server from '../../src';
 
 describe("Responses", () => {
 
+  describe('POST /responses/non_existant', () => {
+    /**
+     * Non-existant questionaire
+     */
+    it('should return 404', async () => {
+      let res = await chai.request(server).post('/v1/responses/non_existant').send({});
+      assert.equal(res.status, 404);
+    })
+  })
+
   /**
    * POST /responses/{name}
    */
@@ -14,8 +25,6 @@ describe("Responses", () => {
     let valid_data = {
       'locale': 'nl_nl',
       'email': 'symptotrack@forest.host',
-
-      // Form data
 
       // coordinates
       'coordinates': [ 5.1214201, 52.0907374 ],
@@ -40,11 +49,11 @@ describe("Responses", () => {
     /**
      * Succesful entry
      */
-    it("should return respondent_id (and sent mail)", async () => {
+    it("should return respondent_id", async () => {
       let res = await chai.request(server).post('/v1/responses/basic').send(valid_data);
 
       assert.equal(res.status, 200);
-      assert.equal(res.body.link, 'string'); // our magic link
+      assert.equal(res.body.respondent_id, 'string'); // our magic link
     });
 
     /**

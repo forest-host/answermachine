@@ -1,8 +1,10 @@
+
 import express from 'express';
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
 import cors from 'cors';
 import { express as config } from 'config';
+import { HTTPError } from './errors';
 
 // import routes
 import v1 from './route/v1';
@@ -24,8 +26,14 @@ app.use('/v1', v1);
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack)
-  res.status(500).send(err.message);
+  if(err instanceof HTTPError) {
+    res.status(err.status_code);
+  } else {
+    res.status(500);
+    console.error(err);
+  }
+
+  res.send(err.message);
 });
 
 export default app;
