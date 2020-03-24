@@ -8,17 +8,24 @@ const find_or_create_question_types = async function(question_types_data) {
   return new bookshelf.Collection(question_types);
 }
 
+const find_or_create_locales = function(locales_data) {
+  return Promise.all(locales_data.map(code => {
+    return models.Locale.forge({ code }).save();
+  }));
+}
+
 exports.seed = async function(knex) {
-  let question_types = await find_or_create_question_types(symptotrack.get_question_types());
+  let [question_types, locales] = await Promise.all([
+    find_or_create_question_types(symptotrack.get_question_types()),
+    find_or_create_locales(symptotrack.get_locales()),
+  ]);
 
   return Promise.all(symptotrack.get_questionaires().map(async name => {
     // When questions seem to be changing, add questions as many to many to questionaire and
     // add a new questionaire revision with new questions
     let questionaire_data = symptotrack.get_questionaire(name);
 
-    let questions_data = Object.keys(questionaire_data.groups).reduce((aggregate, name) => {
-      return Object.assign(aggregate, questionaire_data.groups[name]);
-    }, {});
+    let questions_data = symptotrack.get_questions(questionaire_data);
 
     // TODO - Compare questions in DB with questions in JSON, increment revision when differences occur
     let questionaire = await models.Questionaire.find_or_create({ name, revision: 0 });

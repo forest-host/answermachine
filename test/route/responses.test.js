@@ -35,7 +35,7 @@ describe("Responses", () => {
       // bool
       'fever': true,
       // number, temperature
-      'fever_degrees': 31,
+      'fever_degrees': 37,
       // bool
       'dry_cough': false,
       // text
@@ -52,6 +52,7 @@ describe("Responses", () => {
     it("should return respondent_id", async () => {
       let res = await chai.request(server).post('/v1/responses/basic').send(valid_data);
 
+      console.log(res.body);
       assert.equal(res.status, 200);
       assert.equal(res.body.respondent_id, 'string'); // our magic link
     });
