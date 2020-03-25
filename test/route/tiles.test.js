@@ -46,7 +46,7 @@ function generate_entries(total) {
  * @return number
  */
 function count_sympton(data, key) {
-  return data.reduce((t, i) => (i[key]==true) ? t+1 : t; }, 0);
+  return data.reduce((t, i) => ((i[key]==true) ? t+1 : t), 0);
 }
 
 
