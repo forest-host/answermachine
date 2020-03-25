@@ -215,34 +215,27 @@ const process_response = async function(req, res, next) {
   next();
 }
 
-const update_elastic = async function(req, res, next) {
+const update_elastic = function(req, res, next) {
   if(!req.is_recurring_questionaire && req.valid_data.coordinates) {
     next();
   }
 
-  try {
-    const elastic = new Client({ node: config.node });
+  const elastic = new Client({ node: config.node });
 
-    await elastic.update({
-      index: config.index,
-      id: req.respondent.get('uuid'),
-      body: {
-        doc: {
-          created_at: req.response.get('created_at'),
-          dry_cough: (req.valid_data.dry_cough) ? req.valid_data.dry_cough : false,
-          fever: (req.valid_data.fever) ? req.valid_data.fever : false,
-          fatigue: (req.valid_data.fatigue) ? req.valid_data.fatigue : false,
-          location: req.valid_data.location
-        },
-        doc_as_upsert: true
-      }
-    });
-  } catch(err) {
-    // dont throw error
-    // elastic could be down
-    // index can always be rebuild
-    console.error(err);
-  }
+  elastic.update({
+    index: config.index,
+    id: req.respondent.get('uuid'),
+    body: {
+      doc: {
+        created_at: req.response.get('created_at'),
+        dry_cough: (req.valid_data.dry_cough) ? req.valid_data.dry_cough : false,
+        fever: (req.valid_data.fever) ? req.valid_data.fever : false,
+        fatigue: (req.valid_data.fatigue) ? req.valid_data.fatigue : false,
+        location: req.valid_data.location
+      },
+      doc_as_upsert: true
+    }
+  }).catch( err => { console.error(err); });
 
   next();
 };
