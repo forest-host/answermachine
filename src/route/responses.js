@@ -29,6 +29,28 @@ const load_questionaire = function(req, res, next) {
   }
 }
 
+
+/**
+ * Validate location and set to request
+ */
+const validate_location = function(req, res, next) {
+  // Location is only used in the form: basic
+  if(!req.is_recurring_questionaire && req.body.coordinates) {
+    if(isNaN(req.body.coordinates[0]) || isNaN(req.body.coordinates[1])) {
+      return next(new HTTPError(400, 'Invalid coordinates'));
+    }
+
+    if(req.body.coordinates[0] > 180 && req.body.coordinates[0] < -180 &&
+      req.body.coordinates[1] < 90 && req.body.coordinates[1] < -90) {
+      return next(new HTTPError(400, 'Location invalid'));
+    }
+
+    req.valid_data.coordinates = req.body.coordinates;
+  }
+
+  next();
+}
+
 /**
  * Check if locale exists for questionaire
  */
@@ -193,33 +215,33 @@ const process_response = async function(req, res, next) {
   next();
 }
 
-const update_elastic = function(req, res, next) {
+const update_elastic = async function(req, res, next) {
+  if(!req.is_recurring_questionaire && req.valid_data.coordinates) {
+    next();
+  }
+
   try {
     const elastic = new Client({ node: config.node });
 
-    console.log(req.valid_data);
-
-    /*
     await elastic.update({
       index: config.index,
-      id: req.respondent_uuid,
+      id: req.respondent.get('uuid'),
       body: {
         doc: {
-          created_at:
-          dry_cough:
-          fever:
-          tired:
-          location:
-        }
+          created_at: req.response.get('created_at'),
+          dry_cough: (req.valid_data.dry_cough) ? req.valid_data.dry_cough : false,
+          fever: (req.valid_data.fever) ? req.valid_data.fever : false,
+          fatigue: (req.valid_data.fatigue) ? req.valid_data.fatigue : false,
+          location: req.valid_data.location
+        },
+        doc_as_upsert: true
       }
-    })
-    */
-
+    });
   } catch(err) {
     // dont throw error
     // elastic could be down
     // index can always be rebuild
-    console.log(err);
+    console.error(err);
   }
 
   next();
@@ -231,7 +253,7 @@ const return_response = function(req, res, next) {
   res.json({ respondent_uuid: req.respondent.get('uuid'), questions: req.valid_data });
 };
 
-router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validate_response, load_or_create_respondent, process_response, update_elastic, return_response);
+router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validate_response, validate_location, load_or_create_respondent, process_response, update_elastic, return_response);
 
 
 /**
