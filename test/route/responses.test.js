@@ -35,7 +35,7 @@ describe("Responses", () => {
       // bool
       'fever': true,
       // number, temperature
-      'fever_degrees': 37,
+      'fever_degrees': 37.3,
       // bool
       'dry_cough': false,
       // text

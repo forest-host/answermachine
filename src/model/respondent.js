@@ -8,5 +8,9 @@ export default Model.extend({
   initialize: function() {
     // Set UUID that we can use to pass to frontend as unique code
     this.on('creating', () => this.set('uuid', uuid()));
+  },
+
+  responses: function() {
+    return this.hasMany('Response');
   }
 })

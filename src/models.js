@@ -3,7 +3,7 @@ import { bookshelf } from './bookshelf';
 import require_dir from 'require-dir';
 
 const ucfirst = function(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 let models = require_dir('./model', { 
