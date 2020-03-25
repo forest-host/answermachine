@@ -105,17 +105,14 @@ const process_response = async function(req, res, next) {
   
   // Get shared properties for all answer models
   let get_shared_properties = function(answer) {
-    return {
-      response_id: answer.response_id,
-      question_id: answer.question.get('id'),
-    };
+    return { response_id: answer.response_id, question_id: answer.question.get('id'), };
   };
 
   // As a lot of models use 'value' column for answer value, share logic
   let value_inserter = function(model) {
     return function(data) {
       return knex(model.prototype.tableName).insert(data.map(answer => {
-        return { ...get_shared_properties(answer), value: answer.value}
+        return { ...get_shared_properties(answer), value: answer.value };
       }));
     }
   };
@@ -139,6 +136,7 @@ const process_response = async function(req, res, next) {
 
       return answer_inserters.select(answers);
     },
+    // These all have 'value' column, so we can use the same logic
     date: value_inserter(models.AnswerDate),
     boolean: value_inserter(models.AnswerBoolean),
     float: value_inserter(models.AnswerFloat),
