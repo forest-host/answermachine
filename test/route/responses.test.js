@@ -8,6 +8,31 @@ const assert = chai.assert;
 import server from '../../src';
 
 describe("Responses", () => {
+  const valid_data = {
+    'locale': 'nl_nl',
+    'email': 'symptotrack@forest.host',
+
+    // coordinates
+    'coordinates': [ 5.1214201, 52.0907374 ],
+    // number, year
+    'year_of_birth': 1987,
+    // select
+    'sex': 'non-binary',
+    // bool
+    'fever': true,
+    // number, temperature
+    'fever_degrees': 37.3,
+    // bool
+    'dry_cough': false,
+    // bool
+    'fatigue': false,
+    // text
+    'other_symptons': 'Im crayz',
+    // number
+    'home_leaves': 10,
+    // multiselect, countries
+    'travel_last_weeks': [ 'NLD' ]
+  };
 
   describe('POST /responses/non_existant', () => {
     /**
@@ -20,32 +45,6 @@ describe("Responses", () => {
   })
 
   describe("POST /responses/:questionaire_name", () => {
-    let valid_data = {
-      'locale': 'nl_nl',
-      'email': 'symptotrack@forest.host',
-
-      // coordinates
-      'coordinates': [ 5.1214201, 52.0907374 ],
-      // number, year
-      'year_of_birth': 1987,
-      // select
-      'sex': 'non-binary',
-      // bool
-      'fever': true,
-      // number, temperature
-      'fever_degrees': 37.3,
-      // bool
-      'dry_cough': false,
-      // bool
-      'fatigue': false,
-      // text
-      'other_symptons': 'Im crayz',
-      // number
-      'home_leaves': 10,
-      // multiselect, countries
-      'travel_last_weeks': [ 'NLD' ]
-    };
-
     it('should error on invalid locales', async () => {
       let res = await chai.request(server).post('/v1/responses/basic').send({ locale: 'en_zs' });
 
@@ -103,7 +102,13 @@ describe("Responses", () => {
     })
     
     it('returns last responses for all questionaires respondent submitted', async () => {
-      //let res = await chai.request(server).post('/v1/responses/basic')
+      let res = await chai.request(server).post('/v1/responses/basic').send(valid_data);
+
+      res = await chai.request(server).get(`/v1/responses/${res.body.respondent_uuid}`);
+
+      assert.equal(res.status, 200);
+      console.log(res.body);
+
     })
   })
 });
