@@ -187,6 +187,8 @@ const process_response = async function(req, res, next) {
   // Wait for all the inserts to finish
   await Promise.all(promises);
 
+  // Add response to request so we can use it for elastic
+  req.response = response;
   next();
 }
 
