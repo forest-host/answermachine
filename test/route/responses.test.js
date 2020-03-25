@@ -36,6 +36,8 @@ describe("Responses", () => {
       'fever_degrees': 37.3,
       // bool
       'dry_cough': false,
+      // bool
+      'fatigue': false,
       // text
       'other_symptons': 'Im crayz',
       // number

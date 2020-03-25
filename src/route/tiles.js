@@ -1,10 +1,19 @@
 import Router from 'express';
 import { elastic as config } from 'config';
 import { Client } from '@elastic/elasticsearch';
+import * as symptotrack from '@symptotrack/questions';
 const router = Router();
 
 import { HTTPError } from '../errors';
 
+const questionaire = symptotrack.get_questionaire('basic');
+const questions = symptotrack.get_questions(questionaire);
+
+const aggregations = Object.keys(questions)
+  .filter(question_name => questions[question_name].hasOwnProperty('filter'))
+  .reduce((agg, question_name) => {
+    return { ...agg, [question_name]: { filter: { term: { [question_name]: true } } } };
+  }, {});
 
 /**
  * Validate query parameters
@@ -75,29 +84,7 @@ const query_elastic = async function(req, res, next) {
                   "field": "location",
                   "precision": req.query.z
                 },
-                "aggs": {
-                  "fever": {
-                    "filter": {
-                      "term": {
-                        "fever": true
-                      }
-                    }
-                  },
-                  "dry_cough": {
-                    "filter": {
-                      "term": {
-                        "dry_cough": true
-                      }
-                    }
-                  },
-                  "tired": {
-                    "filter": {
-                      "term": {
-                        "tired": true
-                      }
-                    }
-                  }
-                }
+                "aggs": aggregations,
               }
             }
           }
