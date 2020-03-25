@@ -51,104 +51,85 @@ function count_sympton(data, key) {
 
 
 describe("Tiles", () => {
-  describe("GET /data/tiles", () => {
-    let responses;
+  let responses;
+  /**
+   * Add data to Elastic index
+   */
+  before(done => {
+    responses = generate_entries(10);
+    elastic.bulk({
+      index: config.index,
+      refresh: true,
+      body: responses
+    })
+      .then( () => done() )
+      .catch( err => console.log(err) );
 
-    /**
-     * Add data to Elastic index
-     */
-    before(done => {
-      responses = generate_entries(10);
-      elastic.bulk({
-        index: config.index,
-        refresh: true,
-        body: responses
-      })
-        .then( () => done )
-        .catch( err => console.log(err) );
+  });
 
-    });
-
-    after(done => {
-      elastic.deleteByQuery({
-        index: config.index,
-        body: {
-          query: {
-            match_all: {}
-          }
+  after(done => {
+    elastic.deleteByQuery({
+      index: config.index,
+      body: {
+        query: {
+          match_all: {}
         }
-      })
-        .then( () => done );
-    });
+      }
+    })
+      .then( () => done() );
+  });
 
-    /**
-     * GET get all tiles??
-     */
+  describe("GET /data/tiles", () => {
+
     it("should return 400 when no parameters are passed", async () => {
       let res = await chai.request(server).get('/v1/data/tiles');
 
       assert.equal(res.status, 400);
-      assert.equal(res.body.errors.z, 'Parameter is required');
-      assert.equal(res.body.errors.top, 'Parameter is required');
-      assert.equal(res.body.errors.left, 'Parameter is required');
-      assert.equal(res.body.errors.bottom, 'Parameter is required');
-      assert.equal(res.body.errors.right, 'Parameter is required');
+      assert.equal(res.body.errors.z, 'required');
+      assert.equal(res.body.errors.top, 'required');
+      assert.equal(res.body.errors.left, 'required');
+      assert.equal(res.body.errors.bottom, 'required');
+      assert.equal(res.body.errors.right, 'required');
     });
 
-    // ?z=1&top={LAT}&left={LNG}&bottom={LAT}&right={LNG}
-
-    /**
-     * GET error when zoom below minimum
-     */
     it("should return error when zoom is below minimum", async () => {
       let res = await chai.request(server).get('/v1/data/tiles?z=4&top=50&left=5&bottom=52&right=4');
 
       assert.equal(res.status, 400);
-      assert.equal(res.body.errors.z, 'Invalid range');
+      assert.equal(res.body.errors.z, 'out of bounds');
     });
 
-    /**
-     * GET error when zoom above maximum
-     */
     it("should return error when zoom is above maximum", async () => {
       let res = await chai.request(server).get('/v1/data/tiles?z=11&top=50&left=5&bottom=52&right=4');
 
       assert.equal(res.status, 400);
-      assert.equal(res.body.errors.z, 'Invalid range');
+      assert.equal(res.body.errors.z, 'out of bounds');
     });
 
-    /**
-     * GET error when latitude is out of bounds
-     */
     it("should return error when latitude is invalid", async () => {
       let res = await chai.request(server).get('/v1/data/tiles?z=5&top=91&left=5&bottom=-91&right=4');
 
       assert.equal(res.status, 400);
-      assert.equal(res.body.errors.top, 'Invalid range');
-      assert.equal(res.body.errors.bottom, 'Invalid range');
+      assert.equal(res.body.errors.top, 'out of bounds');
+      assert.equal(res.body.errors.bottom, 'out of bounds');
     });
 
-    /**
-     * GET error when longitude is out of bounds
-     */
     it("should return error when longitude is invalid", async () => {
       let res = await chai.request(server).get('/v1/data/tiles?z=11&top=50&left=181&bottom=52&right=-181');
 
       assert.equal(res.status, 400);
-      assert.equal(res.body.errors.left, 'Invalid range');
-      assert.equal(res.body.errors.right, 'Invalid range');
+      assert.equal(res.body.errors.left, 'out of bounds');
+      assert.equal(res.body.errors.right, 'out of bounds');
     });
 
-    /**
-     * GET all tiles within boundary
-     */
     it("should return all tiles and counts per filter within boundary", async () => {
-      let res = await chai.request(server).get('/v1/data/tiles?z=8&top=51.517&left=4.489&bottom=52.503&right=6.141');
+      let res = await chai.request(server).get('/v1/data/tiles?z=8&top=52.504&left=4.490&bottom=51.518&right=6.142');
 
       assert.equal(res.status, 200);
-      assert.equal(res.body.hits, 1000);
+      assert.equal(res.body.hits, (responses.length / 2));
       assert.isArray(res.body.tiles);
       assert.hasAllKeys(res.body.tiles[0], ['key', 'hits', 'fever', 'dry_cough', 'tired']);
+      assert.equal(res.body.tiles.reduce((t, i) => (t+i.hits), 0), (responses.length / 2));
     });
 
 
