@@ -82,13 +82,6 @@ describe("Responses", () => {
         });
 
       assert.equal(res.status, 400);
-      assert.equal(res.body.errors.email, 'Not a valid email');
-      assert.equal(res.body.errors.coordinates, 'Not a valid coordinate');
-      assert.equal(res.body.errors.year_of_birth, 'Not a valid number (decimals: 0, tag: year)');
-      assert.equal(res.body.errors.fever_degrees, 'Question is not asked');
-      assert.equal(res.body.errors.dry_cough, 'Not a valid bool');
-      assert.equal(res.body.errors.home_leaves, 'Not a valid number (decimals: 0)');
-      assert.equal(res.body.errors.travel_last_2_weeks, 'Not a valid answer (only defined answers are allowed)'); // same error as select, works just the same
     });
 
   });
