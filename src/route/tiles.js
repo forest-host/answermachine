@@ -20,13 +20,15 @@ const validate_query = async function(req, res, next) {
 
   let errors = Object.keys(expected_params).reduce((errors, param) => {
     // is empty?
-    if(!req.query[param])
+    if(!req.query[param]) {
       return { ...errors, [param]: 'required' };
+    }
 
     let conditions = expected_params[param];
 
-    if(req.query[param] < conditions.min || req.query[param] > conditions.max)
+    if(req.query[param] < conditions.min || req.query[param] > conditions.max) {
       return { ...errors, [param]: 'out of bounds' };
+    }
 
     return errors;
   }, {});

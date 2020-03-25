@@ -18,10 +18,11 @@ const load_questionaire = function(req, res, next) {
   if(symptotrack.get_questionaires().indexOf(req.params.questionaire_name) === -1) {
     return next(new HTTPError(404));
   } else {
+    req.is_recurring_questionaire = req.body.hasOwnProperty('respondent_id');
     req.questionaire = symptotrack.get_questionaire(
       req.params.questionaire_name,
       // Get recurring questionaire when respondent id was submitted
-      req.body.hasOwnProperty('respondent_id')
+      req.is_recurring_questionaire,
     );
 
     next();
@@ -95,7 +96,7 @@ const process_response = async function(req, res, next) {
     // Get latest questionaire revision
   let questionaire = await get_questionaire_with_last_revision(req.params.questionaire_name);
 
-  // TODO - Try to load respondent or create one
+  // Create response for respondent
   let response = await models.Response
     .forge({ 
       respondent_id: req.respondent.get('id'), 
