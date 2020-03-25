@@ -104,12 +104,14 @@ const query_elastic = async function(req, res, next) {
  */
 const process_response = function(req, res, next) {
   let tiles = req.tiles.grid.buckets.map( bucket => {
+    let doc_counts = Object.keys(aggregations).reduce((agg, key) => {
+      return { ...agg, [key]: bucket[key].doc_count };
+    }, {})
+  
     return {
       key: bucket.key,
       hits: bucket.doc_count,
-      dry_cough: bucket.dry_cough.doc_count,
-      tired: bucket.tired.doc_count,
-      fever: bucket.fever.doc_count
+      ...doc_counts,
     };
   });
 

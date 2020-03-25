@@ -22,7 +22,7 @@ function generate_entries(total) {
     if(index_switch) {
       index_switch = false;
       return {
-        tired: faker.random.boolean(),
+        fatigue: faker.random.boolean(),
         fever: faker.random.boolean(),
         dry_cough: faker.random.boolean(),
         created_at: faker.date.recent(),
@@ -128,7 +128,7 @@ describe("Tiles", () => {
       assert.equal(res.status, 200);
       assert.equal(res.body.hits, (responses.length / 2));
       assert.isArray(res.body.tiles);
-      assert.hasAllKeys(res.body.tiles[0], ['key', 'hits', 'fever', 'dry_cough', 'tired']);
+      assert.hasAllKeys(res.body.tiles[0], ['key', 'hits', 'fever', 'dry_cough', 'fatigue']);
       assert.equal(res.body.tiles.reduce((t, i) => (t+i.hits), 0), (responses.length / 2));
     });
 
