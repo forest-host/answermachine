@@ -22,32 +22,32 @@ exports.up = async function(knex) {
   });
   
   await Promise.all([
-    knex.schema.createTable('answer_float', table => {
+    knex.schema.createTable('answers_float', table => {
       table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');
       table.bigInteger('response_id').unsigned().references('responses.id').onDelete('cascade');
       table.float('value');
     }),
-    knex.schema.createTable('answer_integer', table => {
+    knex.schema.createTable('answers_integer', table => {
       table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');
       table.bigInteger('response_id').unsigned().references('responses.id').onDelete('cascade');
       table.integer('value');
     }),
-    knex.schema.createTable('answer_boolean', table => {
+    knex.schema.createTable('answers_boolean', table => {
       table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');
       table.bigInteger('response_id').unsigned().references('responses.id').onDelete('cascade');
       table.boolean('value');
     }),
-    knex.schema.createTable('answer_select', table => {
+    knex.schema.createTable('answers_select', table => {
       table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');
       table.bigInteger('response_id').unsigned().references('responses.id').onDelete('cascade');
       table.integer('question_option_id').unsigned().references('question_options.id').onDelete('restrict');
     }),
-    knex.schema.createTable('answer_date', table => {
+    knex.schema.createTable('answers_date', table => {
       table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');
       table.bigInteger('response_id').unsigned().references('responses.id').onDelete('cascade');
       table.date('value');
     }),
-    knex.schema.createTable('answer_string', table => {
+    knex.schema.createTable('answers_string', table => {
       table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');
       table.bigInteger('response_id').unsigned().references('responses.id').onDelete('cascade');
       table.string('value');

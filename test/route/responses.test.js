@@ -18,10 +18,7 @@ describe("Responses", () => {
     })
   })
 
-  /**
-   * POST /responses/{name}
-   */
-  describe("POST /responses/basic", () => {
+  describe("POST /responses/:questionaire_name", () => {
     let valid_data = {
       'locale': 'nl_nl',
       'email': 'symptotrack@forest.host',
@@ -46,25 +43,24 @@ describe("Responses", () => {
       'travel_last_weeks': [ 'NLD' ]
     };
 
-    /**
-     * Succesful entry
-     */
-    it("should return respondent_id", async () => {
-      let res = await chai.request(server).post('/v1/responses/basic').send(valid_data);
-
-      console.log(res.body);
-      assert.equal(res.status, 200);
-      assert.equal(res.body.respondent_id, 'string'); // our magic link
-    });
-
-    /**
-     * Missing required fields
-     */
-    it("should return errors for missing required fields", async () => {
-      let res = await chai.request(server).post('/v1/responses/basic');
+    it('should error on invalid locales', async () => {
+      let res = await chai.request(server).post('/v1/responses/basic').send({ locale: 'en_zs' });
 
       assert.equal(res.status, 400);
-      assert.equal(res.body.errors.locale, 'Field is required'); // Every field is returned in errors with a message
+    })
+
+    it("should return respondent_uuid", async () => {
+      let res = await chai.request(server).post('/v1/responses/basic').send(valid_data);
+
+      assert.equal(res.status, 200);
+      assert.typeOf(res.body.respondent_uuid, 'string'); // our magic link
+    });
+
+    it("should return errors for missing required fields", async () => {
+      let res = await chai.request(server).post('/v1/responses/basic').send({ locale: 'nl_nl' })
+
+      assert.equal(res.status, 400);
+      assert.propertyVal(res.body, 'year_of_birth', 'required'); // Every field is returned in errors with a message
     });
 
     /**

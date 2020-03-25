@@ -5,6 +5,7 @@ const router = Router();
 import * as symptotrack from '@symptotrack/questions';
 import { HTTPError } from '../errors';
 
+import { knex } from '../bookshelf';
 import models from '../models';
 
 /**
@@ -29,7 +30,7 @@ const load_questionaire = function(req, res, next) {
  */
 const load_locale = async function(req, res, next) {
   if(symptotrack.get_questionaire_locales(req.params.questionaire_name).indexOf(req.body.locale) === -1) {
-    return next(new HTTPError(404));
+    return next(new HTTPError(400, 'Invalid locale'));
   } else {
     req.locale = await models.Locale.where({ code: req.body.locale }).fetch({ require: true });
     next();
@@ -69,15 +70,11 @@ const load_or_create_respondent = async function(req, res, next) {
   next();
 }
 
-/**
- * Save a valid response to database
- */
-const process_response = async function(req, res, next) {
-    // Get latest questionaire revision
-  let questionaire = await models.Questionaire
+const get_questionaire_with_last_revision = function (questionaire_name) {
+  return models.Questionaire
     .query(knex => {
       knex
-        .where('name', req.params.questionaire_name)
+        .where('name', questionaire_name)
         .select('id')
         .max('revision')
         .groupBy('id')
@@ -86,7 +83,14 @@ const process_response = async function(req, res, next) {
       require: true,
       withRelated: ['questions', 'questions.question_options'],
     });
+}
 
+/**
+ * Save a valid response to database
+ */
+const process_response = async function(req, res, next) {
+    // Get latest questionaire revision
+  let questionaire = await get_questionaire_with_last_revision(req.params.questionaire_name);
 
   // TODO - Try to load respondent or create one
   let response = await models.Response
@@ -99,34 +103,53 @@ const process_response = async function(req, res, next) {
 
   let questions = symptotrack.get_questions(req.questionaire);
   
+  // Get shared properties for all answer models
+  let get_shared_properties = function(answer) {
+    return {
+      response_id: answer.response_id,
+      question_id: answer.question.get('id'),
+    };
+  };
+
+  // As a lot of models use 'value' column for answer value, share logic
+  let value_inserter = function(model) {
+    return function(data) {
+      return knex(model.prototype.tableName).insert(data.map(answer => {
+        return { ...get_shared_properties(answer), value: answer.value}
+      }));
+    }
+  };
+  
+  // Inserters for every question type
   let answer_inserters = {
+    // Insert all select
     select: function(data) {
-      console.log('inserting selects:', data);
+      // Insert select answers
+      return knex(models.AnswerSelect.prototype.tableName).insert(data.map(answer => {
+        let option = answer.question.related('question_options').find({ attributes: { name: answer.value }});
+
+        return { ...get_shared_properties(answer), question_option_id: option.get('id')}
+      }));
     },
     multiselect: function(data) {
-      console.log('inserting multiselects:', data);
+      // Multiselect uses same model as select, so just delegate to select inserter
+      let answers = data.flatMap(answer => answer.value.map(option => {
+        return { question: answer.question, response_id: answer.response_id, value: option }
+      }));
+
+      return answer_inserters.select(answers);
     },
-    date: function(data) {
-      console.log('inserting dates:', data);
-    },
-    boolean: function(data) {
-      console.log('inserting booleans:', data);
-    },
-    float: function(data) {
-      console.log('inserting floats:', data);
-    },
-    integer: function(data) {
-      console.log('inserting integers:', data);
-    },
-    text: function(data) {
-      console.log('inserting text:', data);
-    },
+    date: value_inserter(models.AnswerDate),
+    boolean: value_inserter(models.AnswerBoolean),
+    float: value_inserter(models.AnswerFloat),
+    integer: value_inserter(models.AnswerInteger),
+    text: value_inserter(models.AnswerString),
   };
 
   // Get question data for inserter from valid_data
   let get_question_data = function(question_name) {
     return {
-      question_id: questionaire.related('questions').find({ attributes: { name: question_name } }).get('id'),
+      question: questionaire.related('questions').find({ attributes: { name: question_name } }),
       response_id: response.get('id'),
       value: req.valid_data[question_name],
     };
@@ -163,7 +186,8 @@ const process_response = async function(req, res, next) {
   // Wait for all the inserts to finish
   await Promise.all(promises);
 
-  res.json({ hi: 'there' });
+  // Send valid data to frontend
+  res.json({ respondent_uuid: req.respondent.get('uuid'), questions: req.valid_data });
 }
 
 router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validate_response, load_or_create_respondent, process_response);
