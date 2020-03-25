@@ -63,18 +63,12 @@ const query_elastic = async function(req, res, next) {
       size: 0,
       body: {
         "aggs": {
-          "area": {
+          "last_month": {
             "filter": {
-              "geo_bounding_box": {
-                "location": {
-                  "top_left": {
-                    "lat": req.query.top,
-                    "lon": req.query.left
-                  },
-                  "bottom_right": {
-                    "lat": req.query.bottom,
-                    "lon": req.query.right
-                  }
+              "range": {
+                "created_at": {
+                  "gte": "now-30d/d",
+                  "lte": "now/d"
                 }
               }
             },
@@ -82,7 +76,17 @@ const query_elastic = async function(req, res, next) {
               "grid": {
                 "geotile_grid": {
                   "field": "location",
-                  "precision": req.query.z
+                  "precision": req.query.z,
+                  "bounds": {
+                    "top_left": {
+                      "lat": req.query.top,
+                      "lon": req.query.left
+                    },
+                    "bottom_right": {
+                      "lat": req.query.bottom,
+                      "lon": req.query.right
+                    }
+                  }
                 },
                 "aggs": aggregations,
               }
@@ -90,7 +94,7 @@ const query_elastic = async function(req, res, next) {
           }
         }
       }
-    }).then( res => res.body.aggregations.area );
+    }).then( res => res.body.aggregations.last_month);
 
   } catch(e) {
     return next(new HTTPError(400));
@@ -107,7 +111,7 @@ const process_response = function(req, res, next) {
     let doc_counts = Object.keys(aggregations).reduce((agg, key) => {
       return { ...agg, [key]: bucket[key].doc_count };
     }, {})
-  
+
     return {
       key: bucket.key,
       hits: bucket.doc_count,
@@ -116,7 +120,7 @@ const process_response = function(req, res, next) {
   });
 
   res.json({
-    hits: req.tiles.doc_count,
+    hits: tiles.reduce((t, i) => { return t+i.hits; }, 0),
     tiles: tiles
   });
 }

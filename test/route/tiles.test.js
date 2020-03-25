@@ -25,7 +25,7 @@ const generate_entries = function(total) {
         fatigue: faker.random.boolean(),
         fever: faker.random.boolean(),
         dry_cough: faker.random.boolean(),
-        created_at: faker.date.recent(),
+        created_at: faker.date.recent(2),
         respondend_id: faker.random.uuid(),
         location: {
           'lat': faker.random.number({ max: 52.503, min: 51.517, precision: 0.001 }),
@@ -129,11 +129,6 @@ describe("Tiles", () => {
       // Calculate total number of fever and compage with given test responses, this validates the bucket counts
       assert.equal(res.body.tiles.reduce((t, i) => (t+i.fever), 0), count_on_key(responses, 'fever'));
     });
-
-
-    /**
-     * @TODO Data specific: check if aggregations return expected counts for each sympton
-     */
 
   });
 });
