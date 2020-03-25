@@ -256,6 +256,7 @@ const load_respondent = async function(req, res, next) {
   try {
     // Add respondent to request
     req.respondent = await models.Respondent.where({ uuid: req.params.respondent_uuid }).fetch({ require: true })
+    next();
   } catch(err) {
     next(new HTTPError(404));
   }
@@ -264,8 +265,21 @@ const load_respondent = async function(req, res, next) {
 /**
  * Get answers to previously filled in questionaires
  */
-const questionaires = function(req, res, next) {
+const get_responses = async function(req, res, next) {
   // TODO - use req.respondent to get previous answers
+
+  let responses = await models.Response
+    .query(knex => {
+      knex
+        .where('respondent_id', req.respondent.get('id'))
+        .select('id')
+        .max('created_at')
+        .groupBy('id')
+    })
+    .fetchAll();
+
+  console.log(responses.toJSON());
+  
   res.json({
     questionaires: {
       basic: {},
@@ -275,7 +289,7 @@ const questionaires = function(req, res, next) {
 }
 
 let uuid_regex = '[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}';
-router.get(`/:respondent_uuid(${uuid_regex})`, load_respondent, questionaires);
+router.get(`/:respondent_uuid(${uuid_regex})`, load_respondent, get_responses);
 
 export default router;
 
