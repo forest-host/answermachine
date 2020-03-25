@@ -8,6 +8,9 @@ import { HTTPError } from '../errors';
 import { knex } from '../bookshelf';
 import models from '../models';
 
+import { elastic as config } from 'config';
+import { Client } from '@elastic/elasticsearch';
+
 /**
  * Load questionaire from symptotrack config
  */
@@ -184,11 +187,48 @@ const process_response = async function(req, res, next) {
   // Wait for all the inserts to finish
   await Promise.all(promises);
 
-  // Send valid data to frontend
-  res.json({ respondent_uuid: req.respondent.get('uuid'), questions: req.valid_data });
+  next();
 }
 
-router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validate_response, load_or_create_respondent, process_response);
+const update_elastic = function(req, res, next) {
+  try {
+    const elastic = new Client({ node: config.node });
+
+    console.log(req.valid_data);
+
+    /*
+    await elastic.update({
+      index: config.index,
+      id: req.respondent_uuid,
+      body: {
+        doc: {
+          created_at:
+          dry_cough:
+          fever:
+          tired:
+          location:
+        }
+      }
+    })
+    */
+
+  } catch(err) {
+    // dont throw error
+    // elastic could be down
+    // index can always be rebuild
+    console.log(err);
+  }
+
+  next();
+};
+
+
+const return_response = function(req, res, next) {
+  // Send valid data to frontend
+  res.json({ respondent_uuid: req.respondent.get('uuid'), questions: req.valid_data });
+};
+
+router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validate_response, load_or_create_respondent, process_response, update_elastic, return_response);
 
 
 /**
