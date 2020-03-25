@@ -231,7 +231,7 @@ const update_elastic = function(req, res, next) {
         dry_cough: (req.valid_data.dry_cough) ? req.valid_data.dry_cough : false,
         fever: (req.valid_data.fever) ? req.valid_data.fever : false,
         fatigue: (req.valid_data.fatigue) ? req.valid_data.fatigue : false,
-        location: req.valid_data.location
+        location: req.valid_data.coordinates
       },
       doc_as_upsert: true
     }
