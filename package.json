@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@symptotrack/questions": "^0.6.9",
+    "@elastic/elasticsearch": "^7.6.1",
     "body-parser": "^1.19.0",
     "bookshelf": "^1.1.0",
     "config": "^3.3.0",
@@ -41,6 +42,7 @@
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "chai-http": "^4.3.0",
+    "faker": "^4.1.0",
     "mocha": "^7.1.1"
   }
 }
