@@ -13,7 +13,7 @@ describe("Responses", () => {
     'email': 'symptotrack@forest.host',
 
     // coordinates
-    'coordinates': [ 5.1214201, 52.0907374 ],
+    'coordinates': [ 7.104480, 60.092876 ],
     // number, year
     'year_of_birth': 1987,
     // select
