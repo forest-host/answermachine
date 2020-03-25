@@ -1,9 +1,10 @@
 import { elastic as config } from 'config';
 import { Client } from '@elastic/elasticsearch';
-const elastic = new Client({ node: config.node });
 
-exports.up = function(knex) {
-  return elastic.indices.create({
+exports.up = async function(knex) {
+  const elastic = new Client({ node: config.node });
+
+  await elastic.indices.create({
     index: config.index,
     body: {
       mappings: {

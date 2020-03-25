@@ -240,7 +240,7 @@ router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validat
 const load_respondent = async function(req, res, next) {
   try {
     // Add respondent to request
-    req.respondent = models.Respondent.where({ uuid: req.params.respondent_uuid }).fetch({ require: true })
+    req.respondent = await models.Respondent.where({ uuid: req.params.respondent_uuid }).fetch({ require: true })
   } catch(err) {
     next(new HTTPError(404));
   }

@@ -5,7 +5,7 @@ const assert = chai.assert;
 
 import server from '../../src';
 
-import faker from 'Faker';
+import faker from 'faker';
 import { elastic as config } from 'config';
 import { Client } from '@elastic/elasticsearch';
 const elastic = new Client({ node: config.node });

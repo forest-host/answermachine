@@ -1,4 +1,5 @@
 
+import { v4 as uuid } from 'uuid';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 chai.use(chaiHttp);
@@ -83,7 +84,24 @@ describe("Responses", () => {
 
       assert.equal(res.status, 400);
     });
-
   });
 
+  describe('GET /responses/:respondent_uuid', () => {
+    it('returns 404 on invalid respondent', async () => {
+      let res = await chai.request(server).get('/v1/responses/1805612')
+
+      assert.equal(res.status, 404);
+    })
+
+    it('returns 404 on unknown respondent', async () => {
+      let fake = uuid();
+      let res = await chai.request(server).get(`/v1/responses/${fake}`)
+
+      assert.equal(res.status, 404);
+    })
+    
+    it('returns last responses for all questionaires respondent submitted', async () => {
+      //let res = await chai.request(server).post('/v1/responses/basic')
+    })
+  })
 });
