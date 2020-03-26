@@ -16,7 +16,7 @@ const elastic = new Client({ node: config.node });
  * @param number entries to generate
  * @return array
  */
-function generate_entries(total) {
+const generate_entries = function(total) {
   let index_switch = false;
   return [...new Array(total*2)].map(() => {
     if(index_switch) {
@@ -25,7 +25,7 @@ function generate_entries(total) {
         fatigue: faker.random.boolean(),
         fever: faker.random.boolean(),
         dry_cough: faker.random.boolean(),
-        created_at: faker.date.recent(),
+        created_at: faker.date.recent(2),
         respondend_id: faker.random.uuid(),
         location: {
           'lat': faker.random.number({ max: 52.503, min: 51.517, precision: 0.001 }),
@@ -45,7 +45,7 @@ function generate_entries(total) {
  * @param string key to match (counts when key == true)
  * @return number
  */
-function count_sympton(data, key) {
+const count_on_key = function(data, key) {
   return data.reduce((t, i) => ((i[key]==true) ? t+1 : t), 0);
 }
 
@@ -55,28 +55,24 @@ describe("Tiles", () => {
   /**
    * Add data to Elastic index
    */
-  before(done => {
+  before( async () => {
     responses = generate_entries(10);
-    elastic.bulk({
+    await elastic.bulk({
       index: config.index,
       refresh: true,
       body: responses
-    })
-      .then( () => done() )
-      .catch( err => console.log(err) );
-
+    });
   });
 
-  after(done => {
-    elastic.deleteByQuery({
+  after( async () => {
+    await elastic.deleteByQuery({
       index: config.index,
       body: {
         query: {
           match_all: {}
         }
       }
-    })
-      .then( () => done() );
+    });
   });
 
   describe("GET /data/tiles", () => {
@@ -130,12 +126,9 @@ describe("Tiles", () => {
       assert.isArray(res.body.tiles);
       assert.hasAllKeys(res.body.tiles[0], ['key', 'hits', 'fever', 'dry_cough', 'fatigue']);
       assert.equal(res.body.tiles.reduce((t, i) => (t+i.hits), 0), (responses.length / 2));
+      // Calculate total number of fever and compage with given test responses, this validates the bucket counts
+      assert.equal(res.body.tiles.reduce((t, i) => (t+i.fever), 0), count_on_key(responses, 'fever'));
     });
-
-
-    /**
-     * @TODO Data specific: check if aggregations return expected counts for each sympton
-     */
 
   });
 });
