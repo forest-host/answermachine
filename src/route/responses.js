@@ -37,26 +37,6 @@ const load_questionaire = function(req, res, next) {
 
 
 /**
- * Validate location and set to request
- */
-const validate_location = function(req, res, next) {
-  if(!req.is_recurring_questionaire && req.body.coordinates) {
-    if(isNaN(req.body.coordinates[0]) || isNaN(req.body.coordinates[1])) {
-      return next(new HTTPError(400, 'Invalid coordinates'));
-    }
-
-    if(req.body.coordinates[0] > 180 && req.body.coordinates[0] < -180 &&
-      req.body.coordinates[1] < 90 && req.body.coordinates[1] < -90) {
-      return next(new HTTPError(400, 'Location invalid'));
-    }
-
-    req.coordinates = req.body.coordinates;
-  }
-
-  next();
-}
-
-/**
  * Check if locale exists for questionaire
  */
 const load_locale = async function(req, res, next) {
@@ -285,7 +265,7 @@ const return_response = function(req, res, next) {
   res.json({ respondent_uuid: req.respondent.get('uuid'), questions: req.valid_data });
 };
 
-router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validate_response, validate_location, load_or_create_respondent, process_response, send_mail, update_elastic, return_response);
+router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validate_response, load_or_create_respondent, process_response, send_mail, update_elastic, return_response);
 
 /**
  * Get answers to previously filled in questionaires

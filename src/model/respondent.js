@@ -8,6 +8,10 @@ export default Model.extend({
   initialize: function() {
     // Set UUID that we can use to pass to frontend as unique code
     this.on('creating', () => this.set('uuid', uuid()));
+    this.on('created', () => {
+      // TODO - sendmail
+      // this.get('uuid');
+    })
   },
 
   responses: function() {
