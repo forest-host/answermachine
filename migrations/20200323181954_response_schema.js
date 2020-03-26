@@ -4,8 +4,6 @@ exports.up = async function(knex) {
     knex.schema.createTable('respondents', table => {
       table.bigIncrements();
       table.uuid('uuid');
-      table.float('latitude');
-      table.float('longitude');
     }),
     knex.schema.createTable('locales', table => {
       table.increments();

@@ -36,7 +36,6 @@ const load_questionaire = function(req, res, next) {
  * Validate location and set to request
  */
 const validate_location = function(req, res, next) {
-  // Location is only used in the form: basic
   if(!req.is_recurring_questionaire && req.body.coordinates) {
     if(isNaN(req.body.coordinates[0]) || isNaN(req.body.coordinates[1])) {
       return next(new HTTPError(400, 'Invalid coordinates'));
@@ -85,19 +84,12 @@ const load_or_create_respondent = async function(req, res, next) {
   if(typeof(req.body.respondent_uuid) !== 'undefined') {
     try {
       req.respondent = await models.Respondent.where('uuid', req.body.respondent_uuid).fetch({ require: true });
-      req.recurring = true;
     } catch {
       return next(new Error('Invalid respondent_id'));
     }
   } else {
-      // TODO - lat lon
-    let respondent = new models.Respondent({
-      latitude: req.coordinates[0],
-      longitude: req.coordinates[1],
-    });
-
+    let respondent = new models.Respondent();
     req.respondent = await respondent.save();
-    req.recurring = false;
   }
 
   next();
@@ -223,7 +215,7 @@ const process_response = async function(req, res, next) {
 }
 
 const update_elastic = function(req, res, next) {
-  if(!req.is_recurring_questionaire && req.coordinates) {
+  if(!req.is_recurring_questionaire && req.valid_data.hasOwnProperty('coordinates')) {
     next();
   }
 
@@ -238,7 +230,7 @@ const update_elastic = function(req, res, next) {
         dry_cough: (req.valid_data.dry_cough) ? req.valid_data.dry_cough : false,
         fever: (req.valid_data.fever) ? req.valid_data.fever : false,
         fatigue: (req.valid_data.fatigue) ? req.valid_data.fatigue : false,
-        location: req.coordinates
+        location: req.valid_data.coordinates,
       },
       doc_as_upsert: true
     }
@@ -253,7 +245,7 @@ const return_response = function(req, res, next) {
   res.json({ respondent_uuid: req.respondent.get('uuid'), questions: req.valid_data });
 };
 
-router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validate_response, validate_location, load_or_create_respondent, process_response, update_elastic, return_response);
+router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validate_response, load_or_create_respondent, process_response, update_elastic, return_response);
 
 /**
  * Get answers to previously filled in questionaires

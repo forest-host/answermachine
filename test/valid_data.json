@@ -1,4 +1,9 @@
 {
+  "locale": "nl_nl",
+  "email": "symptotrack@forest.host",
+
+  "responding_for": "self",
+  "coordinates": [ 7.145480, 60.092876 ],
   "year_of_birth": 1987,
   "sex": "non-binary",
   "fever": true,
