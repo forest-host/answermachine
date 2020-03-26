@@ -90,7 +90,7 @@ describe("Responses", () => {
     });
   });
 
-  describe('GET /responses/:respondent_uuid', () => {
+  describe('GET /responses/:questionaire_name/:respondent_uuid', () => {
     it('returns 404 on invalid respondent', async () => {
       let res = await chai.request(server).get('/v1/responses/1805612')
 
