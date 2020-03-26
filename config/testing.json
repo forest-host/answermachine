@@ -10,7 +10,8 @@
     "node": "http://localhost:9200",
     "mapping": {
       "location": { "type": "geo_point" },
-      "created_at": { "type": "date" }
+      "created_at": { "type": "date" },
+      "updated_at": { "type": "date" }
     }
   },
   "knex": {

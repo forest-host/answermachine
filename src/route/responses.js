@@ -235,7 +235,7 @@ const send_mail = async function(req, res, next) {
 };
 
 const update_elastic = function(req, res, next) {
-  if(!req.is_recurring_questionaire && req.valid_data.hasOwnProperty('coordinates')) {
+  if(req.valid_data.hasOwnProperty('coordinates')) {
     next();
   }
 
@@ -243,10 +243,11 @@ const update_elastic = function(req, res, next) {
 
   elastic.update({
     index: config.elastic.index,
-    id: req.respondent.get('uuid'),
+    id: req.respondent.get('id'), // @TODO better use Elastic IDs (they index faster)
     body: {
       doc: {
         created_at: req.response.get('created_at'),
+        updated_at: req.response.get('updated_at'),
         dry_cough: (req.valid_data.dry_cough) ? req.valid_data.dry_cough : false,
         fever: (req.valid_data.fever) ? req.valid_data.fever : false,
         fatigue: (req.valid_data.fatigue) ? req.valid_data.fatigue : false,
