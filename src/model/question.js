@@ -15,4 +15,28 @@ export default Model.extend({
   question_options: function() {
     return this.hasMany('QuestionOption');
   },
+
+  answers_select: function() {
+    return this.hasMany('AnswerSelect');
+  },
+
+  answers_float: function() {
+    return this.hasMany('AnswerFloat');
+  },
+
+  answers_integer: function() {
+    return this.hasMany('AnswerInteger');
+  },
+
+  answers_string: function() {
+    return this.hasMany('AnswerString');
+  },
+
+  answers_date: function() {
+    return this.hasMany('AnswerDate');
+  },
+
+  answers_boolean: function() {
+    return this.hasMany('AnswerDate');
+  },
 })

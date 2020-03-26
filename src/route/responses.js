@@ -279,13 +279,24 @@ const get_responses = async function(req, res, next) {
     .query(knex => {
       knex
         .where('respondent_id', req.respondent.get('id'))
-        .select('id')
-        .max('created_at')
-        .groupBy('id')
+        //.select('id')
+        //.max('created_at')
+        //.groupBy('id')
     })
-    .fetchAll();
+    .fetchAll({
+      withRelated: [
+        'questionaire',
+        'questionaire.questions',
+        'questionaire.questions.answers_select',
+        'questionaire.questions.answers_integer',
+        'questionaire.questions.answers_float',
+        'questionaire.questions.answers_date',
+        'questionaire.questions.answers_string',
+        'questionaire.questions.answers_boolean',
+      ]
+    });
 
-  console.log(responses.toJSON());
+  console.log(require('util').inspect(responses.toJSON(), false, null));
   
   res.json({
     questionaires: {
