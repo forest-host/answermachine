@@ -47,7 +47,7 @@ const validate_location = function(req, res, next) {
       return next(new HTTPError(400, 'Location invalid'));
     }
 
-    req.valid_data.coordinates = req.body.coordinates;
+    req.coordinates = req.body.coordinates;
   }
 
   next();
@@ -90,7 +90,12 @@ const load_or_create_respondent = async function(req, res, next) {
       return next(new Error('Invalid respondent_id'));
     }
   } else {
-    let respondent = new models.Respondent();
+      // TODO - lat lon
+    let respondent = new models.Respondent({
+      latitude: req.coordinates[0],
+      longitude: req.coordinates[1],
+    });
+
     req.respondent = await respondent.save();
     req.recurring = false;
   }
@@ -218,7 +223,7 @@ const process_response = async function(req, res, next) {
 }
 
 const update_elastic = function(req, res, next) {
-  if(!req.is_recurring_questionaire && req.valid_data.coordinates) {
+  if(!req.is_recurring_questionaire && req.coordinates) {
     next();
   }
 
@@ -233,7 +238,7 @@ const update_elastic = function(req, res, next) {
         dry_cough: (req.valid_data.dry_cough) ? req.valid_data.dry_cough : false,
         fever: (req.valid_data.fever) ? req.valid_data.fever : false,
         fatigue: (req.valid_data.fatigue) ? req.valid_data.fatigue : false,
-        location: req.valid_data.coordinates
+        location: req.coordinates
       },
       doc_as_upsert: true
     }
