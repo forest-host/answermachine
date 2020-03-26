@@ -4,6 +4,8 @@ exports.up = async function(knex) {
     knex.schema.createTable('respondents', table => {
       table.bigIncrements();
       table.uuid('uuid');
+      table.float('latitude');
+      table.float('longitude');
     }),
     knex.schema.createTable('locales', table => {
       table.increments();
@@ -16,8 +18,6 @@ exports.up = async function(knex) {
     table.bigInteger('respondent_id').unsigned().references('respondents.id').onDelete('cascade');
     table.integer('questionaire_id').unsigned().references('questionaires.id').onDelete('restrict');
     table.integer('locale_id').unsigned().references('locales.id').onDelete('restrict');
-    table.float('latitude');
-    table.float('longitude');
     table.timestamps();
   });
   

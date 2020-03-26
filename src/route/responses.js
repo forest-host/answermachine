@@ -344,6 +344,7 @@ const get_responses = async function(req, res, next) {
     return data;
   }, {});
 
+  // Return data to frontend
   res.json(data);
 }
 
