@@ -1,0 +1,10 @@
+{
+  "year_of_birth": 1987,
+  "sex": "non-binary",
+  "fever": true,
+  "fever_degrees": 37.3,
+  "dry_cough": false,
+  "fatigue": false,
+  "home_leaves": 10,
+  "travel_last_weeks": [ "NLD", "CHN" ]
+}

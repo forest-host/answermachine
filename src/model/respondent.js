@@ -12,5 +12,9 @@ export default Model.extend({
 
   responses: function() {
     return this.hasMany('Response');
-  }
+  },
+
+  recoveries: function() {
+    return this.hasMany('Recovery');
+  } 
 })

@@ -7,9 +7,11 @@ import { HTTPError } from '../errors';
 
 import { knex as knex } from '../bookshelf';
 import models from '../models';
+import load_respondent from '../middleware/load_respondent';
 
 import { elastic as config } from 'config';
 import { Client } from '@elastic/elasticsearch';
+
 
 /**
  * Load questionaire from symptotrack config
@@ -248,20 +250,6 @@ const return_response = function(req, res, next) {
 
 router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validate_response, validate_location, load_or_create_respondent, process_response, update_elastic, return_response);
 
-
-/**
- * Load respondent when requesting previous submissions
- */
-const load_respondent = async function(req, res, next) {
-  try {
-    // Add respondent to request
-    req.respondent = await models.Respondent.where({ uuid: req.params.respondent_uuid }).fetch({ require: true })
-    next();
-  } catch(err) {
-    next(new HTTPError(404));
-  }
-}
-
 /**
  * Get answers to previously filled in questionaires
  */
@@ -277,10 +265,20 @@ const get_responses = async function(req, res, next) {
   // Get answers for last response respondent submitted
   let answers = await knex('questions')
     .join('questionaires_questions', 'questions.id', 'questionaires_questions.question_id')
+
+    // Only get questions of submitted questionaire
     .join('questionaires', 'questionaires_questions.questionaire_id', 'questionaires.id')
+    .where('questionaires.name', req.params.questionaire_name)
+    .select('questions.id', 'questions.name')
+    .groupBy('questions.id')
+
+    // Get last response of respondent when multiple responses submitted
     .join('responses', 'questionaires.id', 'responses.questionaire_id')
     .where('responses.respondent_id', req.respondent.get('id'))
-    .select('questions.id', 'questions.name')
+    .max('responses.created_at')
+    .groupBy('responses.id')
+
+    // Join answers to questions
     .leftOuterJoin('answers_select', joiner('answers_select'))
     .leftOuterJoin('question_options', 'answers_select.question_option_id', 'question_options.id')
     .select(knex.raw('group_concat(question_options.name) as value_select'))
@@ -295,12 +293,6 @@ const get_responses = async function(req, res, next) {
     .leftOuterJoin('answers_boolean', joiner('answers_boolean'))
     .select('answers_boolean.value as value_boolean')
 
-  // Get last response
-    .max('responses.created_at')
-    .groupBy('responses.id')
-
-  // Get data for each question
-    .groupBy('questions.id')
 
   let questions = symptotrack.get_questions(req.questionaire);
 
@@ -314,6 +306,7 @@ const get_responses = async function(req, res, next) {
       value_tag = 'value_select';
     }
 
+    // Check answer type
     let is_question_type_answer = answer.hasOwnProperty(value_tag) && answer[value_tag] !== null;
     let is_string_answer = answer['value_text'] !== null;
 
@@ -326,13 +319,11 @@ const get_responses = async function(req, res, next) {
       if(question.type == 'multiselect') {
         value = value.split(',');
       }
-
       if(question.type == 'boolean') {
         // convert to bool
         value = !! value;
       }
     }
-
     if(is_string_answer) {
       value = answer['value_text'];
     }
