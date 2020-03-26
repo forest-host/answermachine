@@ -333,6 +333,7 @@ const get_responses = async function(req, res, next) {
         value = value.split(',').map(parseFloat);
       }
     }
+    // Could be this is overridden "other" answer
     if(is_string_answer) {
       value = answer['value_text'];
     }
