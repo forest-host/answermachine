@@ -1,0 +1,31 @@
+<p>Allereerst willen we jou, of de persoon waarvoor je de vragen hebt beantwoord, heel veel beterschap wensen.</p>
+
+<h3>Symptomen aanpassen of beter melden</h3>
+<p>Krijg je er de komende dagen nieuwe symptomen bij? Laat het ons dan weten. Klik op de onderstaande link om je symptomen bij te werken. Verergeren je symptomen? Neem dan contact op met je huisarts en volg de instructies van de overheid en het RIVM.</p>
+
+<p><a href="{{=it.link}}">Jouw persoonlijke link</a></p>
+
+<p>Ben je weer helemaal beter? Gebruik dan dezelfde link om je beter te melden. We gaan er vanuit dat je beter bent als je minimaal 24 uur helemaal geen symptomen meer hebt. Door je beter te melden kunnen we bijhouden hoe de groepsimmuniteit toeneemt.</p>
+
+<p>Of help ons door nog wat extra vragen te beantwoorden. Met deze informatie kunnen we wetenschappers helpen om nog meer te weten te komen over het virus. Klik op de link en open de extra vragenlijst.</p>
+
+<h3>Verspreid de vragenlijst, niet het virus</h3>
+<p>Help ons meer symptomen in kaart te brengen door de vragenlijst te delen. Heb je zelf symptomen van het virus? Dan is het extra belangrijk om de vragenlijst door te sturen naar iedereen die je de afgelopen twee weken hebt gezien.</p>
+
+<p>
+{{ for (let [ key, value ] of Object.entries(it.socials)) { }}
+<a href="{{=value}}">{{=key}}</a><br />
+{{ } }}
+</p>
+
+<h3>Contact</h3>
+<p>Wil je meer weten over de vragenlijst of SymptoTrack? Neem dan contact met ons op.</p>
+
+<p><strong>Mail ons</strong>
+mail@symptotrack.org</p>
+
+<p>Of bekijk onze social mediakanalen<br />
+{{ for (let [ key, value ] of Object.entries(it.socials)) { }}
+<a href="{{=value}}">{{=key}}</a><br />
+{{ } }}
+</p>
