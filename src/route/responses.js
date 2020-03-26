@@ -161,6 +161,11 @@ const process_response = async function(req, res, next) {
 
       return answer_inserters.select(answers);
     },
+    coordinates: function(data) {
+      return knex(models.AnswerCoordinates.prototype.tableName).insert(data.map(answer => {
+        return { ...get_shared_properties(answer), latitude: answer.value[0], longitude: answer.value[1] }
+      }))
+    },
     // These all have 'value' column, so we can use the same logic
     date: value_inserter(models.AnswerDate),
     boolean: value_inserter(models.AnswerBoolean),
@@ -289,6 +294,8 @@ const get_responses = async function(req, res, next) {
     .select('answers_string.value as value_text')
     .leftOuterJoin('answers_boolean', joiner('answers_boolean'))
     .select('answers_boolean.value as value_boolean')
+    .leftOuterJoin('answers_coordinates', joiner('answers_coordinates'))
+    .select(knex.raw('concat(answers_coordinates.latitude, ", ", answers_coordinates.longitude) as value_coordinates'))
 
 
   let questions = symptotrack.get_questions(req.questionaire);
@@ -313,12 +320,17 @@ const get_responses = async function(req, res, next) {
     if(is_question_type_answer) {
       value = answer[value_tag];
 
+      // convert to array
       if(question.type == 'multiselect') {
         value = value.split(',');
       }
+      // convert to bool
       if(question.type == 'boolean') {
-        // convert to bool
         value = !! value;
+      }
+      // Convert to coord array
+      if(question.type == 'coordinates') {
+        value = value.split(',').map(parseFloat);
       }
     }
     if(is_string_answer) {
