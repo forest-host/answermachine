@@ -21,5 +21,16 @@
       "password": "answermachine",
       "database": "answermachine"
     }
+  },
+  "email": {
+    "from": "no-reply@symptotrack.org",
+    "reply_to": "mail@symptotrack.org",
+    "magiclink": "https://www.symptotrack.org/edit?token=",
+    "socials": {
+      "twitter": "https://twitter.com/SymptoTrack",
+      "facebook": "https://www.facebook.com/SymptoTrack",
+      "linkedin": "https://www.linkedin.com/company/symptotrack",
+      "instagram": "https://www.instagram.com/symptotrack/"
+    }
   }
 }

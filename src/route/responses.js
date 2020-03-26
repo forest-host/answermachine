@@ -9,9 +9,13 @@ import { knex as knex } from '../bookshelf';
 import models from '../models';
 import load_respondent from '../middleware/load_respondent';
 
-import { elastic as config } from 'config';
+import config from 'config';
 import { Client } from '@elastic/elasticsearch';
 
+import email_subjects from '../../emails/subjects.json';
+import fs from 'fs';
+import dot from 'dot';
+import nodemailer from 'nodemailer';
 
 /**
  * Load questionaire from symptotrack config
@@ -217,15 +221,46 @@ const process_response = async function(req, res, next) {
   next();
 }
 
+const send_mail = async function(req, res, next) {
+  // Only send mail on first questionaire
+  if(!req.is_recurring_questionaire) {
+    next();
+  }
+
+  if(typeof email_subjects[req.body.locale] !== 'undefined') {
+    // No locale email subject, and thus template, found
+    next();
+  }
+
+  let template = dot.template(fs.readFileSync(__dirname + '/../../emails/' + req.body.locale + '.dot').toString());
+  let link = config.email.magiclink + req.respondent.get('uuid');
+
+  try {
+    let transporter = nodemailer.createTransport({ sendmail: true });
+
+    await transporter.sendMail({
+      from: config.email.from,
+      to: req.body.email,
+      replyTo: config.email.reply_to,
+      subject: email_subjects[req.body.locale],
+      html: template({ ...config.email, link })
+    });
+  } catch(err) {
+    console.error(err);
+  }
+
+  next();
+};
+
 const update_elastic = function(req, res, next) {
   if(!req.is_recurring_questionaire && req.valid_data.coordinates) {
     next();
   }
 
-  const elastic = new Client({ node: config.node });
+  const elastic = new Client({ node: config.elastic.node });
 
   elastic.update({
-    index: config.index,
+    index: config.elastic.index,
     id: req.respondent.get('uuid'),
     body: {
       doc: {
@@ -248,7 +283,7 @@ const return_response = function(req, res, next) {
   res.json({ respondent_uuid: req.respondent.get('uuid'), questions: req.valid_data });
 };
 
-router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validate_response, validate_location, load_or_create_respondent, process_response, update_elastic, return_response);
+router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validate_response, validate_location, load_or_create_respondent, process_response, send_mail, update_elastic, return_response);
 
 /**
  * Get answers to previously filled in questionaires
