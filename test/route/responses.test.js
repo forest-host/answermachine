@@ -8,12 +8,15 @@ const assert = chai.assert;
 import server from '../../src';
 
 describe("Responses", () => {
-  const valid_data = {
+  const valid_response_data = {
     'locale': 'nl_nl',
     'email': 'symptotrack@forest.host',
 
     // coordinates
     'coordinates': [ 7.104480, 60.092876 ],
+  }
+
+  const valid_questionaire_data = {
     // number, year
     'year_of_birth': 1987,
     // select
@@ -26,13 +29,13 @@ describe("Responses", () => {
     'dry_cough': false,
     // bool
     'fatigue': false,
-    // text
-    'other_symptons': 'Im crayz',
     // number
     'home_leaves': 10,
     // multiselect, countries
-    'travel_last_weeks': [ 'NLD' ]
+    'travel_last_weeks': [ 'NLD', 'CHN' ]
   };
+
+  const valid_data = Object.assign({}, valid_questionaire_data, valid_response_data);
 
   describe('POST /responses/non_existant', () => {
     /**
@@ -101,14 +104,13 @@ describe("Responses", () => {
       assert.equal(res.status, 404);
     })
     
-    it('returns last responses for all questionaires respondent submitted', async () => {
+    it('returns last responses for questionaires respondent submitted', async () => {
       let res = await chai.request(server).post('/v1/responses/basic').send(valid_data);
 
-      res = await chai.request(server).get(`/v1/responses/${res.body.respondent_uuid}`);
+      res = await chai.request(server).get(`/v1/responses/basic/${res.body.respondent_uuid}`);
 
       assert.equal(res.status, 200);
-      console.log(res.body);
-
+      assert.deepEqual(res.body, valid_questionaire_data);
     })
   })
 });

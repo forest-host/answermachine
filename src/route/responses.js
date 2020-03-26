@@ -5,7 +5,7 @@ const router = Router();
 import * as symptotrack from '@symptotrack/questions';
 import { HTTPError } from '../errors';
 
-import { knex } from '../bookshelf';
+import { knex as knex } from '../bookshelf';
 import models from '../models';
 
 import { elastic as config } from 'config';
@@ -266,41 +266,89 @@ const load_respondent = async function(req, res, next) {
  * Get answers to previously filled in questionaires
  */
 const get_responses = async function(req, res, next) {
-  // TODO - use req.respondent to get previous answers
+  const joiner = function(table) {
+    return function() {
+      this
+        .on('questions.id', `${table}.question_id`)
+        .on('responses.id', `${table}.response_id`);
+    }
+  }
 
-  let responses = await models.Response
-    .query(knex => {
-      knex
-        .where('respondent_id', req.respondent.get('id'))
-        //.select('id')
-        //.max('created_at')
-        //.groupBy('id')
-    })
-    .fetchAll({
-      withRelated: [
-        'questionaire',
-        'questionaire.questions',
-        'questionaire.questions.answers_select',
-        'questionaire.questions.answers_integer',
-        'questionaire.questions.answers_float',
-        'questionaire.questions.answers_date',
-        'questionaire.questions.answers_string',
-        'questionaire.questions.answers_boolean',
-      ]
-    });
+  // Get answers for last response respondent submitted
+  let answers = await knex('questions')
+    .join('questionaires_questions', 'questions.id', 'questionaires_questions.question_id')
+    .join('questionaires', 'questionaires_questions.questionaire_id', 'questionaires.id')
+    .join('responses', 'questionaires.id', 'responses.questionaire_id')
+    .where('responses.respondent_id', req.respondent.get('id'))
+    .select('questions.id', 'questions.name')
+    .leftOuterJoin('answers_select', joiner('answers_select'))
+    .leftOuterJoin('question_options', 'answers_select.question_option_id', 'question_options.id')
+    .select(knex.raw('group_concat(question_options.name) as value_select'))
+    .leftOuterJoin('answers_integer', joiner('answers_integer'))
+    .select('answers_integer.value as value_integer')
+    .leftOuterJoin('answers_float', joiner('answers_float'))
+    .select('answers_float.value as value_float')
+    .leftOuterJoin('answers_date', joiner('answers_date'))
+    .select('answers_date.value as value_date')
+    .leftOuterJoin('answers_string', joiner('answers_string'))
+    .select('answers_string.value as value_text')
+    .leftOuterJoin('answers_boolean', joiner('answers_boolean'))
+    .select('answers_boolean.value as value_boolean')
 
-  console.log(require('util').inspect(responses.toJSON(), false, null));
-  
-  res.json({
-    questionaires: {
-      basic: {},
-      extended: {},
-    },
-  })
+  // Get last response
+    .max('responses.created_at')
+    .groupBy('responses.id')
+
+  // Get data for each question
+    .groupBy('questions.id')
+
+  let questions = symptotrack.get_questions(req.questionaire);
+
+  // Create json blob from query data
+  let data = answers.reduce((data, answer) => {
+    let question = questions[answer.name];
+
+    // Get correct value from answer
+    let value_tag = `value_${question.type}`;
+    if(question.type == 'multiselect') {
+      value_tag = 'value_select';
+    }
+
+    let is_question_type_answer = answer.hasOwnProperty(value_tag) && answer[value_tag] !== null;
+    let is_string_answer = answer['value_text'] !== null;
+
+    let value = null;
+
+    // Get value from answer
+    if(is_question_type_answer) {
+      value = answer[value_tag];
+
+      if(question.type == 'multiselect') {
+        value = value.split(',');
+      }
+
+      if(question.type == 'boolean') {
+        // convert to bool
+        value = !! value;
+      }
+    }
+
+    if(is_string_answer) {
+      value = answer['value_text'];
+    }
+
+    // Return aggregate
+    if(value !== null) {
+      return { ...data, [answer.name]: value }
+    }
+    return data;
+  }, {});
+
+  res.json(data);
 }
 
 let uuid_regex = '[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}';
-router.get(`/:respondent_uuid(${uuid_regex})`, load_respondent, get_responses);
+router.get(`/:questionaire_name(\\w+)/:respondent_uuid(${uuid_regex})`, load_questionaire, load_respondent, get_responses);
 
 export default router;
 
