@@ -11,7 +11,8 @@
     "mapping": {
       "location": { "type": "geo_point" },
       "created_at": { "type": "date" },
-      "updated_at": { "type": "date" }
+      "updated_at": { "type": "date" },
+      "recovered_at": { "type": "date" }
     }
   },
   "knex": {
