@@ -4,8 +4,6 @@ exports.up = async function(knex) {
     knex.schema.createTable('respondents', table => {
       table.bigIncrements();
       table.uuid('uuid');
-      table.float('latitude');
-      table.float('longitude');
     }),
     knex.schema.createTable('locales', table => {
       table.increments();
@@ -51,6 +49,12 @@ exports.up = async function(knex) {
       table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');
       table.bigInteger('response_id').unsigned().references('responses.id').onDelete('cascade');
       table.string('value');
+    }),
+    knex.schema.createTable('answers_coordinates', table => {
+      table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');
+      table.bigInteger('response_id').unsigned().references('responses.id').onDelete('cascade');
+      table.float('latitude');
+      table.float('longitude');
     }),
   ])
 };

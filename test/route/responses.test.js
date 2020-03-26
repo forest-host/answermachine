@@ -5,10 +5,7 @@ import chaiHttp from 'chai-http';
 chai.use(chaiHttp);
 const assert = chai.assert;
 
-import valid_response_data from '../response_data';
-import valid_questionaire_data from '../questionaire_data';
-const valid_data = Object.assign({}, valid_questionaire_data, valid_response_data);
-
+import valid_data from '../valid_data';
 import server from '../../src';
 
 describe("Responses", () => {
@@ -83,8 +80,13 @@ describe("Responses", () => {
 
       res = await chai.request(server).get(`/v1/responses/basic/${res.body.respondent_uuid}`);
 
+      let data = JSON.parse(JSON.stringify(valid_data));
+      // Strip the stuff we dont save
+      delete data.locale;
+      delete data.email;
+
       assert.equal(res.status, 200);
-      assert.deepEqual(res.body, valid_questionaire_data);
+      assert.deepEqual(res.body, data);
     })
   })
 });

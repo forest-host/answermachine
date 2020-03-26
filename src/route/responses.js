@@ -40,7 +40,6 @@ const load_questionaire = function(req, res, next) {
  * Validate location and set to request
  */
 const validate_location = function(req, res, next) {
-  // Location is only used in the form: basic
   if(!req.is_recurring_questionaire && req.body.coordinates) {
     if(isNaN(req.body.coordinates[0]) || isNaN(req.body.coordinates[1])) {
       return next(new HTTPError(400, 'Invalid coordinates'));
@@ -51,7 +50,7 @@ const validate_location = function(req, res, next) {
       return next(new HTTPError(400, 'Location invalid'));
     }
 
-    req.valid_data.coordinates = req.body.coordinates;
+    req.coordinates = req.body.coordinates;
   }
 
   next();
@@ -89,14 +88,12 @@ const load_or_create_respondent = async function(req, res, next) {
   if(typeof(req.body.respondent_uuid) !== 'undefined') {
     try {
       req.respondent = await models.Respondent.where('uuid', req.body.respondent_uuid).fetch({ require: true });
-      req.recurring = true;
     } catch {
       return next(new Error('Invalid respondent_id'));
     }
   } else {
     let respondent = new models.Respondent();
     req.respondent = await respondent.save();
-    req.recurring = false;
   }
 
   next();
@@ -167,6 +164,11 @@ const process_response = async function(req, res, next) {
       }));
 
       return answer_inserters.select(answers);
+    },
+    coordinates: function(data) {
+      return knex(models.AnswerCoordinates.prototype.tableName).insert(data.map(answer => {
+        return { ...get_shared_properties(answer), latitude: answer.value[0], longitude: answer.value[1] }
+      }))
     },
     // These all have 'value' column, so we can use the same logic
     date: value_inserter(models.AnswerDate),
@@ -253,7 +255,7 @@ const send_mail = async function(req, res, next) {
 };
 
 const update_elastic = function(req, res, next) {
-  if(!req.is_recurring_questionaire && req.valid_data.coordinates) {
+  if(!req.is_recurring_questionaire && req.valid_data.hasOwnProperty('coordinates')) {
     next();
   }
 
@@ -268,7 +270,7 @@ const update_elastic = function(req, res, next) {
         dry_cough: (req.valid_data.dry_cough) ? req.valid_data.dry_cough : false,
         fever: (req.valid_data.fever) ? req.valid_data.fever : false,
         fatigue: (req.valid_data.fatigue) ? req.valid_data.fatigue : false,
-        location: req.valid_data.coordinates
+        location: req.valid_data.coordinates,
       },
       doc_as_upsert: true
     }
@@ -327,6 +329,8 @@ const get_responses = async function(req, res, next) {
     .select('answers_string.value as value_text')
     .leftOuterJoin('answers_boolean', joiner('answers_boolean'))
     .select('answers_boolean.value as value_boolean')
+    .leftOuterJoin('answers_coordinates', joiner('answers_coordinates'))
+    .select(knex.raw('concat(answers_coordinates.latitude, ", ", answers_coordinates.longitude) as value_coordinates'))
 
 
   let questions = symptotrack.get_questions(req.questionaire);
@@ -351,12 +355,17 @@ const get_responses = async function(req, res, next) {
     if(is_question_type_answer) {
       value = answer[value_tag];
 
+      // convert to array
       if(question.type == 'multiselect') {
         value = value.split(',');
       }
+      // convert to bool
       if(question.type == 'boolean') {
-        // convert to bool
         value = !! value;
+      }
+      // Convert to coord array
+      if(question.type == 'coordinates') {
+        value = value.split(',').map(parseFloat);
       }
     }
     if(is_string_answer) {
