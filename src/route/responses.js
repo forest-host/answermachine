@@ -35,7 +35,6 @@ const load_questionaire = function(req, res, next) {
   }
 }
 
-
 /**
  * Check if locale exists for questionaire
  */
@@ -239,6 +238,13 @@ const update_elastic = function(req, res, next) {
     next();
   }
 
+  let questions = symptotrack.get_questions(req.questionaire);
+  let filters = Object.keys(questions)
+    .filter(question_name => questions[question_name].hasOwnProperty('filter'))
+    .reduce((agg, question_name) => {
+      return { ...agg, [question_name]: req.valid_data[question_name] };
+    }, {});
+
   const elastic = new Client({ node: config.elastic.node });
 
   elastic.update({
@@ -248,14 +254,12 @@ const update_elastic = function(req, res, next) {
       doc: {
         created_at: req.response.get('created_at'),
         updated_at: req.response.get('updated_at'),
-        dry_cough: (req.valid_data.dry_cough) ? req.valid_data.dry_cough : false,
-        fever: (req.valid_data.fever) ? req.valid_data.fever : false,
-        fatigue: (req.valid_data.fatigue) ? req.valid_data.fatigue : false,
         location: req.valid_data.coordinates,
+        ...filters
       },
       doc_as_upsert: true
     }
-  }).catch( err => { console.error(err); });
+  }).catch( err => { console.error(err.body.error); });
 
   next();
 };
