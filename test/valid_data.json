@@ -3,8 +3,9 @@
   "email": "symptotrack@forest.host",
 
   "responding_for": "self",
-  "coordinates": [ 7.145480, 60.092876 ],
+  "location": [ 7.145480, 60.092876 ],
   "year_of_birth": 1987,
+  "start_symptoms": 8,
   "sex": "non-binary",
   "fever": true,
   "fever_degrees": 37.3,

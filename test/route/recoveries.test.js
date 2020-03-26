@@ -5,10 +5,7 @@ import chaiHttp from 'chai-http';
 chai.use(chaiHttp);
 const assert = chai.assert;
 
-import valid_response_data from '../response_data';
-import valid_questionaire_data from '../questionaire_data';
-const valid_data = Object.assign({}, valid_questionaire_data, valid_response_data);
-
+import valid_data from '../valid_data';
 import server from '../../src';
 
 describe('Recoveries', () => {

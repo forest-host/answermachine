@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^7.6.1",
-    "@symptotrack/questions": "^0.6.13",
+    "@symptotrack/questions": "^0.6.15",
     "body-parser": "^1.19.0",
     "bookshelf": "^1.1.0",
     "config": "^3.3.1",
