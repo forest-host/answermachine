@@ -13,6 +13,8 @@ const mappings = Object.keys(questions)
   }, {});
 
 exports.up = async function(knex) {
+  console.log(config.elastic);
+
   const elastic = new Client({ node: config.elastic.node });
 
   await elastic.indices.create({
