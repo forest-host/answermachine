@@ -8,6 +8,15 @@ import { knex } from '../bookshelf';
 
 import { elastic as config } from 'config';
 import { Client } from '@elastic/elasticsearch';
+import * as symptotrack from '@symptotrack/questions';
+const questionaire = symptotrack.get_questionaire('basic');
+const questions = symptotrack.get_questions(questionaire);
+
+const filters = Object.keys(questions)
+  .filter(question_name => questions[question_name].hasOwnProperty('filter'))
+  .reduce((agg, question_name) => {
+    return { ...agg, [question_name]: false };
+  }, {});
 
 const process_recovery = async function(req, res, next) {
   await knex('recoveries').insert({
@@ -27,7 +36,8 @@ const update_elastic = function(req, res, next) {
     id: req.respondent.get('id'), // @TODO better use Elastic IDs (they index faster)
     body: {
       doc: {
-        recovered_at: new Date()
+        recovered_at: new Date(),
+        ...filters
       },
       doc_as_upsert: true
     }
