@@ -1,11 +1,11 @@
 // Update with your config settings.
 
 require('@babel/register');
-const config = require('config').knex;
+const config = require('./lib/config');
 
 module.exports = {
-	development: config,
-	staging: config,
-	testing: config,
-	production: config,
+	development: config.knex,
+	staging: config.knex,
+	testing: config.knex,
+	production: config.knex,
 };
