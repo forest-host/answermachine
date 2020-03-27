@@ -10,14 +10,14 @@ import server from '../../src';
 describe('confirm', () => {
   describe('POST /confirm', () => {
     it('returns 404 for unknown respondent', async () => {
-      let res = await chai.request(server).post('/v1/confirm/').send({ 'uuid': uuid });
+      let res = await chai.request(server).post(`/v1/confirm/${uuid()}`)
 
       assert.propertyVal(res, 'status', 404);
     })
 
     it('confirms respondents email', async () => {
       let post = await chai.request(server).post('/v1/responses/basic').send(valid_data);
-      let res = await chai.request(server).post('/v1/confirm/').send({ 'uuid': post.body.respondent_uuid });
+      let res = await chai.request(server).post(`/v1/confirm/${post.body.respondent_uuid}`).send({});
 
       assert.propertyVal(res, 'status', 200);
     })
