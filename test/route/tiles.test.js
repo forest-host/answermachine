@@ -2,14 +2,23 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 chai.use(chaiHttp);
 const assert = chai.assert;
+import faker from 'faker';
 
 import server from '../../src';
 
-import faker from 'faker';
 import { elastic as config } from 'config';
 import { Client } from '@elastic/elasticsearch';
 const elastic = new Client({ node: config.node });
 
+import * as symptotrack from '@symptotrack/questions';
+const questionaire = symptotrack.get_questionaire('basic');
+const questions = symptotrack.get_questions(questionaire);
+
+const filters = Object.keys(questions)
+  .filter(question_name => questions[question_name].hasOwnProperty('filter'))
+  .reduce((agg, question_name) => {
+    return { ...agg, [question_name]: faker.random.boolean() };
+  }, {});
 
 /**
  * Generate fake entries
@@ -22,16 +31,14 @@ const generate_entries = function(total) {
     if(index_switch) {
       index_switch = false;
       return {
-        fatigue: faker.random.boolean(),
-        fever: faker.random.boolean(),
-        dry_cough: faker.random.boolean(),
         created_at: faker.date.recent(2),
         updated_at: faker.date.recent(2),
         respondend_id: faker.random.uuid(),
         location: {
           'lat': faker.random.number({ max: 52.503, min: 51.517, precision: 0.001 }),
           'lon': faker.random.number({ max: 6.141, min: 4.489, precision: 0.001 }),
-        }
+        },
+        ...filters
       };
     } else {
       index_switch = true;
@@ -125,7 +132,8 @@ describe("Tiles", () => {
       assert.equal(res.status, 200);
       assert.equal(res.body.hits, (responses.length / 2));
       assert.isArray(res.body.tiles);
-      assert.hasAllKeys(res.body.tiles[0], ['key', 'hits', 'fever', 'dry_cough', 'fatigue', 'recovered']);
+      let result_keys = Object.keys(filters);
+      assert.hasAllKeys(res.body.tiles[0], ['key', 'hits', 'recovered', ...result_keys]);
       assert.equal(res.body.tiles.reduce((t, i) => (t+i.hits), 0), (responses.length / 2));
       // Calculate total number of fever and compage with given test responses, this validates the bucket counts
       assert.equal(res.body.tiles.reduce((t, i) => (t+i.fever), 0), count_on_key(responses, 'fever'));
