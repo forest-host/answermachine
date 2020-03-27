@@ -4,4 +4,4 @@ import app from './app';
 
 // Setup API
 const server = http.createServer(app);
-export default server.listen(config.server.port);
+export default server.listen(config.express.server.port);
