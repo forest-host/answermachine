@@ -270,7 +270,16 @@ const return_response = function(req, res, next) {
   res.json({ respondent_uuid: req.respondent.get('uuid'), questions: req.valid_data });
 };
 
-router.post('/:questionaire_name(\\w+)', load_questionaire, load_locale, validate_response, load_or_create_respondent, process_response, send_mail, update_elastic, return_response);
+router.post('/:questionaire_name(\\w+)', 
+  load_questionaire,
+  load_locale,
+  validate_response,
+  load_or_create_respondent,
+  process_response, 
+  send_mail,
+  update_elastic,
+  return_response
+);
 
 /**
  * Get answers to previously filled in questionaires
