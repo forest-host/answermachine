@@ -9,7 +9,7 @@ import { HTTPError } from '../errors';
 const questionaire = symptotrack.get_questionaire('basic');
 const questions = symptotrack.get_questions(questionaire);
 
-const aggregations = Object.keys(questions)
+let aggregations = Object.keys(questions)
   .filter(question_name => questions[question_name].hasOwnProperty('filter'))
   .reduce((agg, question_name) => {
     return { ...agg, [question_name]: { filter: { term: { [question_name]: true } } } };
@@ -58,37 +58,40 @@ const query_elastic = async function(req, res, next) {
   try {
     const elastic = new Client({ node: config.node });
 
+    // @TODO this query can be improved to support better insights over time. For that we need to save seperate records over time instead of updating existing records
+    aggregations.recovered = { filter: { exists: { field: 'recovered_at' } } };
+
     req.tiles = await elastic.search({
       index: config.index,
       size: 0,
       body: {
-        "aggs": {
-          "last_month": {
-            "filter": {
-              "range": {
-                "created_at": {
-                  "gte": "now-30d/d",
-                  "lte": "now/d"
+        aggs: {
+          last_month: {
+            filter: {
+              range: {
+                updated_at: {
+                  gte: "now-30d/d",
+                  lte: "now/d"
                 }
               }
             },
-            "aggs": {
-              "grid": {
-                "geotile_grid": {
-                  "field": "location",
-                  "precision": req.query.z,
-                  "bounds": {
-                    "top_left": {
-                      "lat": req.query.top,
-                      "lon": req.query.left
+            aggs: {
+              grid: {
+                geotile_grid: {
+                  field: "location",
+                  precision: req.query.z,
+                  bounds: {
+                    top_left: {
+                      lat: req.query.top,
+                      lon: req.query.left
                     },
-                    "bottom_right": {
-                      "lat": req.query.bottom,
-                      "lon": req.query.right
+                    bottom_right: {
+                      lat: req.query.bottom,
+                      lon: req.query.right
                     }
                   }
                 },
-                "aggs": aggregations,
+                aggs: aggregations,
               }
             }
           }

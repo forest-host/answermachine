@@ -26,6 +26,7 @@ const generate_entries = function(total) {
         fever: faker.random.boolean(),
         dry_cough: faker.random.boolean(),
         created_at: faker.date.recent(2),
+        updated_at: faker.date.recent(2),
         respondend_id: faker.random.uuid(),
         location: {
           'lat': faker.random.number({ max: 52.503, min: 51.517, precision: 0.001 }),
@@ -124,10 +125,13 @@ describe("Tiles", () => {
       assert.equal(res.status, 200);
       assert.equal(res.body.hits, (responses.length / 2));
       assert.isArray(res.body.tiles);
-      assert.hasAllKeys(res.body.tiles[0], ['key', 'hits', 'fever', 'dry_cough', 'fatigue']);
+      assert.hasAllKeys(res.body.tiles[0], ['key', 'hits', 'fever', 'dry_cough', 'fatigue', 'recovered']);
       assert.equal(res.body.tiles.reduce((t, i) => (t+i.hits), 0), (responses.length / 2));
       // Calculate total number of fever and compage with given test responses, this validates the bucket counts
       assert.equal(res.body.tiles.reduce((t, i) => (t+i.fever), 0), count_on_key(responses, 'fever'));
+      assert.equal(res.body.tiles.reduce((t, i) => (t+i.fatigue), 0), count_on_key(responses, 'fatigue'));
+      assert.equal(res.body.tiles.reduce((t, i) => (t+i.dry_cough), 0), count_on_key(responses, 'dry_cough'));
+      assert.equal(res.body.tiles.reduce((t, i) => (t+i.recovered), 0), count_on_key(responses, 'recovered'));
     });
 
   });
