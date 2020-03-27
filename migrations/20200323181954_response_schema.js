@@ -4,6 +4,7 @@ exports.up = async function(knex) {
     knex.schema.createTable('respondents', table => {
       table.bigIncrements();
       table.uuid('uuid');
+      table.boolean('email_confirmer');
     }),
     knex.schema.createTable('locales', table => {
       table.increments();
@@ -18,7 +19,7 @@ exports.up = async function(knex) {
     table.integer('locale_id').unsigned().references('locales.id').onDelete('restrict');
     table.timestamps();
   });
-  
+
   await Promise.all([
     knex.schema.createTable('answers_float', table => {
       table.integer('question_id').unsigned().references('questions.id').onDelete('restrict');
