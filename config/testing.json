@@ -27,7 +27,7 @@
   "email": {
     "from": "no-reply@symptotrack.org",
     "reply_to": "mail@symptotrack.org",
-    "magiclink": "https://www.symptotrack.org/edit?token=",
+    "magiclink": "https://www.symptotrack.org/edit?type=basic&token=",
     "socials": {
       "twitter": "https://twitter.com/SymptoTrack",
       "facebook": "https://www.facebook.com/SymptoTrack",
