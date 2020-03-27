@@ -1,5 +1,5 @@
 import Router from 'express';
-import { elastic as config } from 'config';
+import config from '../config';
 import { Client } from '@elastic/elasticsearch';
 import * as symptotrack from '@symptotrack/questions';
 const router = Router();
@@ -56,13 +56,13 @@ const validate_query = async function(req, res, next) {
  */
 const query_elastic = async function(req, res, next) {
   try {
-    const elastic = new Client({ node: config.node });
+    const elastic = new Client({ node: config.elastic.node });
 
     // @TODO this query can be improved to support better insights over time. For that we need to save seperate records over time instead of updating existing records
     aggregations.recovered = { filter: { exists: { field: 'recovered_at' } } };
 
     req.tiles = await elastic.search({
-      index: config.index,
+      index: config.elastic.index,
       size: 0,
       body: {
         aggs: {

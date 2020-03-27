@@ -5,6 +5,8 @@
   "responding_for": "self",
   "location": [ 7.14, 60.09 ],
   "year_of_birth": 1987,
+  "social_distancing": "yes",
+  "terms_and_conditions": true,
   "start_symptoms": 8,
   "sex": "non-binary",
   "fever": true,

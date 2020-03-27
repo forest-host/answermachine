@@ -9,7 +9,7 @@ import { knex as knex } from '../bookshelf';
 import models from '../models';
 import load_respondent from '../middleware/load_respondent';
 
-import config from 'config';
+import config from '../config';
 import { Client } from '@elastic/elasticsearch';
 
 import email_subjects from '../../emails/subjects.json';

@@ -6,7 +6,7 @@ import load_respondent from '../middleware/load_respondent';
 import models from '../models';
 import { knex } from '../bookshelf';
 
-import { elastic as config } from 'config';
+import config from '../config';
 import { Client } from '@elastic/elasticsearch';
 import * as symptotrack from '@symptotrack/questions';
 const questionaire = symptotrack.get_questionaire('basic');
@@ -29,10 +29,10 @@ const process_recovery = async function(req, res, next) {
 }
 
 const update_elastic = function(req, res, next) {
-  const elastic = new Client({ node: config.node });
+  const elastic = new Client({ node: config.elastic.node });
 
   elastic.update({
-    index: config.index,
+    index: config.elastic.index,
     id: req.respondent.get('id'), // @TODO better use Elastic IDs (they index faster)
     body: {
       doc: {

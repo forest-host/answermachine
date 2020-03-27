@@ -1,0 +1,38 @@
+{
+  "express": {
+    "origin": "https://www.symptotrack.org",
+    "server": {
+      "port": 80
+    }
+  },
+  "elastic": {
+    "index": "responses",
+    "node": "",
+    "mapping": {
+      "location": { "type": "geo_point" },
+      "created_at": { "type": "date" },
+      "updated_at": { "type": "date" },
+      "recovered_at": { "type": "date" }
+    }
+  },
+  "knex": {
+    "client": "mysql",
+    "connection": {
+      "host": "",
+      "user": "",
+      "password": "",
+      "database": ""
+    }
+  },
+  "email": {
+    "from": "no-reply@symptotrack.org",
+    "reply_to": "mail@symptotrack.org",
+    "magiclink": "https://www.symptotrack.org/edit?type=basic&token=",
+    "socials": {
+      "twitter": "https://twitter.com/SymptoTrack",
+      "facebook": "https://www.facebook.com/SymptoTrack",
+      "linkedin": "https://www.linkedin.com/company/symptotrack",
+      "instagram": "https://www.instagram.com/symptotrack/"
+    }
+  }
+}

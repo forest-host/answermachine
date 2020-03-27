@@ -19,6 +19,7 @@ describe('Recoveries', () => {
     it('saves recovery for respondent', async () => {
       // Get respondent id
       let post = await chai.request(server).post('/v1/responses/basic').send(valid_data);
+      console.log(post.body);
       let res = await chai.request(server).post(`/v1/recoveries/${post.body.respondent_uuid}`).send({});
 
       assert.propertyVal(res, 'status', 200);
