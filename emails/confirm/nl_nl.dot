@@ -1,0 +1,13 @@
+<p><a href="{{=it.link}}">Jouw persoonlijke bevestiginglink</a></p>
+
+<h3>Contact</h3>
+<p>Wil je meer weten over de vragenlijst of SymptoTrack? Neem dan contact met ons op.</p>
+
+<p><strong>Mail ons</strong><br />
+mail@symptotrack.org</p>
+
+<p>Of bekijk onze social mediakanalen<br />
+{{ for (let [ key, value ] of Object.entries(it.socials)) { }}
+<a href="{{=value}}">{{=key}}</a><br />
+{{ } }}
+</p>
