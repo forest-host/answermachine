@@ -14,5 +14,7 @@
   "dry_cough": false,
   "fatigue": false,
   "home_leaves": 10,
-  "travel_last_weeks": [ "NLD", "CHN" ]
+  "travel_last_weeks": [ "NLD", "CHN" ],
+  "social_distancing": "yes",
+  "terms_and_conditions": true
 }
