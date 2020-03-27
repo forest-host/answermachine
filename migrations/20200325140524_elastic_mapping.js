@@ -1,4 +1,5 @@
-import { elastic as config } from 'config';
+
+import config from '../lib/config';
 import { Client } from '@elastic/elasticsearch';
 import * as symptotrack from '@symptotrack/questions';
 
@@ -12,13 +13,13 @@ const mappings = Object.keys(questions)
   }, {});
 
 exports.up = async function(knex) {
-  const elastic = new Client({ node: config.node });
+  const elastic = new Client({ node: config.elastic.node });
 
   await elastic.indices.create({
-    index: config.index,
+    index: config.elastic.index,
     body: {
       mappings: {
-        properties: { ...config.mapping, ...mappings },
+        properties: { ...config.elastic.mapping, ...mappings },
       }
     }
   });
