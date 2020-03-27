@@ -37,7 +37,7 @@ const send_mail = async function(req, res, next) {
   }
 
   let template = dot.template(fs.readFileSync(__dirname + '/../../emails/update/' + req.body.locale + '.dot').toString());
-  let link = config.email.confirmlink + req.respondent.get('uuid');
+  let link = config.email.magiclink + req.respondent.get('uuid');
 
   try {
     let transporter = nodemailer.createTransport({ sendmail: true });
