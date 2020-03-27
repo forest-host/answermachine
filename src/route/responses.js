@@ -78,6 +78,9 @@ const load_or_create_respondent = async function(req, res, next) {
   next();
 }
 
+/**
+ * Get latest filled in questionaire
+ */
 const get_questionaire_with_last_revision = function (questionaire_name) {
   return models.Questionaire
     .query(knex => {
