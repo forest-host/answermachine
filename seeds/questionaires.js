@@ -1,7 +1,7 @@
 
 import * as symptotrack from '@symptotrack/questions';
-import { knex, bookshelf } from '../src/bookshelf';
-import models from '../src/models';
+import { knex, bookshelf } from '../lib/bookshelf';
+import models from '../lib/models';
 
 const find_or_create_question_types = async function(question_types_data) {
   let question_types = await Promise.all(question_types_data.map(name => models.QuestionType.find_or_create({ name })));
