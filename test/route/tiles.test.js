@@ -14,11 +14,21 @@ import * as symptotrack from '@symptotrack/questions';
 const questionaire = symptotrack.get_questionaire('basic');
 const questions = symptotrack.get_questions(questionaire);
 
-const filters = Object.keys(questions)
+const filters = function() {
+  return Object.keys(questions)
   .filter(question_name => questions[question_name].hasOwnProperty('filter'))
   .reduce((agg, question_name) => {
     return { ...agg, [question_name]: faker.random.boolean() };
   }, {});
+}
+
+// Set bounds to create entries in and to run tests on
+let bounds = {
+  'bottom': 50.584,
+  'left': 3.086,
+  'top': 53.855,
+  'right': 7.549
+};
 
 /**
  * Generate fake entries
@@ -35,10 +45,10 @@ const generate_entries = function(total) {
         updated_at: faker.date.recent(2),
         respondend_id: faker.random.uuid(),
         location: {
-          'lat': faker.random.number({ max: 52.503, min: 51.517, precision: 0.001 }),
-          'lon': faker.random.number({ max: 6.141, min: 4.489, precision: 0.001 }),
+          'lat': faker.random.number({ max: bounds.top, min: bounds.bottom, precision: 0.001 }),
+          'lon': faker.random.number({ max: bounds.right, min: bounds.left, precision: 0.001 }),
         },
-        ...filters
+        ...filters()
       };
     } else {
       index_switch = true;
@@ -64,7 +74,7 @@ describe("Tiles", () => {
    * Add data to Elastic index
    */
   before( async () => {
-    responses = generate_entries(10);
+    responses = generate_entries(100);
     await elastic.bulk({
       index: config.index,
       refresh: true,
@@ -97,7 +107,7 @@ describe("Tiles", () => {
     });
 
     it("should return error when zoom is below minimum", async () => {
-      let res = await chai.request(server).get('/v1/data/tiles?z=4&top=50&left=5&bottom=52&right=4');
+      let res = await chai.request(server).get('/v1/data/tiles?z=1&top=50&left=5&bottom=52&right=4');
 
       assert.equal(res.status, 400);
       assert.equal(res.body.errors.z, 'out of bounds');
@@ -127,7 +137,7 @@ describe("Tiles", () => {
     });
 
     it("should return all tiles and counts per filter within boundary", async () => {
-      let res = await chai.request(server).get('/v1/data/tiles?z=8&top=52.504&left=4.490&bottom=51.518&right=6.142');
+      let res = await chai.request(server).get(`/v1/data/tiles?z=6&top=${bounds.top}&left=${bounds.left}&bottom=${bounds.bottom}&right=${bounds.right}`);
 
       assert.equal(res.status, 200);
       assert.equal(res.body.hits, (responses.length / 2));
