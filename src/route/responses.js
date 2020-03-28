@@ -12,7 +12,7 @@ import load_respondent from '../middleware/load_respondent';
 import config from '../config';
 import { Client } from '@elastic/elasticsearch';
 
-import email_subjects from '../../emails/subjects.json';
+import email_subjects from '../../emails/confirm/subjects.json';
 import fs from 'fs';
 import dot from 'dot';
 import nodemailer from 'nodemailer';
@@ -205,19 +205,22 @@ const process_response = async function(req, res, next) {
   next();
 }
 
+/**
+ * Send email confirmation email
+ */
 const send_mail = async function(req, res, next) {
   // Only send mail on first questionaire
   if(!req.is_recurring_questionaire) {
     next();
   }
 
-  if(typeof email_subjects[req.body.locale] !== 'undefined') {
+  if(typeof email_subjects[req.body.locale] == 'undefined') {
     // No locale email subject, and thus template, found
     next();
   }
 
-  let template = dot.template(fs.readFileSync(__dirname + '/../../emails/' + req.body.locale + '.dot').toString());
-  let link = config.email.magiclink + req.respondent.get('uuid');
+  let template = dot.template(fs.readFileSync(__dirname + '/../../emails/confirm/' + req.body.locale + '.dot').toString());
+  let link = config.email.confirmlink + '?token=' + req.respondent.get('uuid') + '&locale=' + req.body.locale + '&email=' + req.body.email;
 
   try {
     let transporter = nodemailer.createTransport({ sendmail: true });

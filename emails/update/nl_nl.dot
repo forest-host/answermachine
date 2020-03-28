@@ -21,8 +21,8 @@
 <h3>Contact</h3>
 <p>Wil je meer weten over de vragenlijst of SymptoTrack? Neem dan contact met ons op.</p>
 
-<p><strong>Mail ons</strong>
-mail@symptotrack.org</p>
+<p><strong>Mail ons</strong><br />
+info@symptotrack.org</p>
 
 <p>Of bekijk onze social mediakanalen<br />
 {{ for (let [ key, value ] of Object.entries(it.socials)) { }}
