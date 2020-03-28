@@ -4,7 +4,6 @@ exports.up = async function(knex) {
     knex.schema.createTable('respondents', table => {
       table.bigIncrements();
       table.uuid('uuid');
-      table.boolean('email_confirmed');
     }),
     knex.schema.createTable('locales', table => {
       table.increments();
