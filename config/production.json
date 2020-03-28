@@ -1,6 +1,6 @@
 {
   "express": {
-    "origin": "https://www.symptotrack.org",
+    "origin": "https://staging.symptotrack.org",
     "server": {
       "port": 80
     }
