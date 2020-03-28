@@ -24,7 +24,7 @@ const load_questionaire = function(req, res, next) {
   if(symptotrack.get_questionaires().indexOf(req.params.questionaire_name) === -1) {
     return next(new HTTPError(404));
   } else {
-    req.is_recurring_questionaire = req.body.hasOwnProperty('respondent_id');
+    req.is_recurring_questionaire = req.body.hasOwnProperty('respondent_uuid');
     req.questionaire = symptotrack.get_questionaire(
       req.params.questionaire_name,
       // Get recurring questionaire when respondent id was submitted
