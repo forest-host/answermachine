@@ -240,7 +240,7 @@ const send_mail = async function(req, res, next) {
 };
 
 const update_elastic = function(req, res, next) {
-  if(req.valid_data.hasOwnProperty('coordinates')) {
+  if(typeof req.valid_data.location == 'undefined') {
     next();
   }
 
@@ -260,7 +260,7 @@ const update_elastic = function(req, res, next) {
       doc: {
         created_at: req.response.get('created_at'),
         updated_at: req.response.get('updated_at'),
-        location: req.valid_data.coordinates,
+        location: req.valid_data.location,
         ...filters
       },
       doc_as_upsert: true
