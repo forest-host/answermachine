@@ -20,7 +20,7 @@ let aggregations = Object.keys(questions)
  */
 const validate_query = async function(req, res, next) {
   const expected_params = {
-    'z': { min: 2, max: 9 },
+    'z': { min: 2, max: 15 },
     'top': { min: -90, max: 90 },
     'bottom': { min: -90, max: 90 },
     'left': { min: -180, max: 180 },
