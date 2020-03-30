@@ -142,7 +142,7 @@ describe("Tiles", () => {
       assert.equal(res.status, 200);
       assert.equal(res.body.hits, (responses.length / 2));
       assert.isArray(res.body.tiles);
-      let result_keys = Object.keys(filters);
+      let result_keys = Object.keys(filters());
       assert.hasAllKeys(res.body.tiles[0], ['key', 'hits', 'recovered', ...result_keys]);
       assert.equal(res.body.tiles.reduce((t, i) => (t+i.hits), 0), (responses.length / 2));
       // Calculate total number of fever and compage with given test responses, this validates the bucket counts

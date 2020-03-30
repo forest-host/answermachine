@@ -99,7 +99,8 @@ const query_elastic = async function(req, res, next) {
       }
     }).then( res => res.body.aggregations.last_month);
 
-  } catch(e) {
+  } catch(err) {
+    console.error(err.body);
     return next(new HTTPError(400));
   }
 
