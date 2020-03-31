@@ -1,11 +1,13 @@
 import Router from 'express';
 import config from '../config';
 import { Client } from '@elastic/elasticsearch';
-import * as symptotrack from '@symptotrack/questions';
+import { HTTPError } from '../errors';
 const router = Router();
 
-import { HTTPError } from '../errors';
+import models from '../models';
+import { knex } from '../bookshelf';
 
+import * as symptotrack from '@symptotrack/questions';
 const questionaire = symptotrack.get_questionaire('basic');
 const questions = symptotrack.get_questions(questionaire);
 
@@ -157,6 +159,24 @@ const process_response = function(req, res, next) {
  *
  * @apiSuccess
  */
-router.get('/', validate_query, query_elastic, process_response);
+router.get('/spots', validate_query, query_elastic, process_response);
+
+/**
+ * @api {get} /v1/data/counts number of respondents
+ *
+ * @apiSuccess
+ */
+const process_count = async function(req, res, next) {
+  try {
+    let count = await knex('respondents').count('id as count');
+    res.json(count[0]);
+  } catch(err) {
+    console.error(err);
+    return new HTTPError(400);
+  }
+};
+
+
+router.get('/counts', process_count);
 
 export default router;
