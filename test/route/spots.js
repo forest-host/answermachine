@@ -68,7 +68,7 @@ const count_on_key = function(data, key) {
 }
 
 
-describe("Tiles", () => {
+describe("Spots", () => {
   let responses;
   /**
    * Add data to Elastic index
@@ -93,10 +93,10 @@ describe("Tiles", () => {
     });
   });
 
-  describe("GET /data/tiles", () => {
+  describe("GET /data/spots", () => {
 
     it("should return 400 when no parameters are passed", async () => {
-      let res = await chai.request(server).get('/v1/data/tiles');
+      let res = await chai.request(server).get('/v1/data/spots');
 
       assert.equal(res.status, 400);
       assert.equal(res.body.errors.z, 'required');
@@ -107,21 +107,21 @@ describe("Tiles", () => {
     });
 
     it("should return error when zoom is below minimum", async () => {
-      let res = await chai.request(server).get('/v1/data/tiles?z=1&top=50&left=5&bottom=52&right=4');
+      let res = await chai.request(server).get('/v1/data/spots?z=1&top=50&left=5&bottom=52&right=4');
 
       assert.equal(res.status, 400);
       assert.equal(res.body.errors.z, 'out of bounds');
     });
 
     it("should return error when zoom is above maximum", async () => {
-      let res = await chai.request(server).get('/v1/data/tiles?z=11&top=50&left=5&bottom=52&right=4');
+      let res = await chai.request(server).get('/v1/data/spots?z=11&top=50&left=5&bottom=52&right=4');
 
       assert.equal(res.status, 400);
       assert.equal(res.body.errors.z, 'out of bounds');
     });
 
     it("should return error when latitude is invalid", async () => {
-      let res = await chai.request(server).get('/v1/data/tiles?z=5&top=91&left=5&bottom=-91&right=4');
+      let res = await chai.request(server).get('/v1/data/spots?z=5&top=91&left=5&bottom=-91&right=4');
 
       assert.equal(res.status, 400);
       assert.equal(res.body.errors.top, 'out of bounds');
@@ -129,27 +129,27 @@ describe("Tiles", () => {
     });
 
     it("should return error when longitude is invalid", async () => {
-      let res = await chai.request(server).get('/v1/data/tiles?z=11&top=50&left=181&bottom=52&right=-181');
+      let res = await chai.request(server).get('/v1/data/spots?z=11&top=50&left=181&bottom=52&right=-181');
 
       assert.equal(res.status, 400);
       assert.equal(res.body.errors.left, 'out of bounds');
       assert.equal(res.body.errors.right, 'out of bounds');
     });
 
-    it("should return all tiles and counts per filter within boundary", async () => {
-      let res = await chai.request(server).get(`/v1/data/tiles?z=6&top=${bounds.top}&left=${bounds.left}&bottom=${bounds.bottom}&right=${bounds.right}`);
+    it("should return all spots and counts per filter within boundary", async () => {
+      let res = await chai.request(server).get(`/v1/data/spots?z=6&top=${bounds.top}&left=${bounds.left}&bottom=${bounds.bottom}&right=${bounds.right}`);
 
       assert.equal(res.status, 200);
       assert.equal(res.body.hits, (responses.length / 2));
-      assert.isArray(res.body.tiles);
+      assert.isArray(res.body.spots);
       let result_keys = Object.keys(filters());
-      assert.hasAllKeys(res.body.tiles[0], ['key', 'hits', 'recovered', ...result_keys]);
-      assert.equal(res.body.tiles.reduce((t, i) => (t+i.hits), 0), (responses.length / 2));
+      assert.hasAllKeys(res.body.spots[0], ['key', 'location', 'hits', 'recovered', ...result_keys]);
+      assert.equal(res.body.spots.reduce((t, i) => (t+i.hits), 0), (responses.length / 2));
       // Calculate total number of fever and compage with given test responses, this validates the bucket counts
-      assert.equal(res.body.tiles.reduce((t, i) => (t+i.fever), 0), count_on_key(responses, 'fever'));
-      assert.equal(res.body.tiles.reduce((t, i) => (t+i.fatigue), 0), count_on_key(responses, 'fatigue'));
-      assert.equal(res.body.tiles.reduce((t, i) => (t+i.dry_cough), 0), count_on_key(responses, 'dry_cough'));
-      assert.equal(res.body.tiles.reduce((t, i) => (t+i.recovered), 0), count_on_key(responses, 'recovered'));
+      assert.equal(res.body.spots.reduce((t, i) => (t+i.fever), 0), count_on_key(responses, 'fever'));
+      assert.equal(res.body.spots.reduce((t, i) => (t+i.fatigue), 0), count_on_key(responses, 'fatigue'));
+      assert.equal(res.body.spots.reduce((t, i) => (t+i.dry_cough), 0), count_on_key(responses, 'dry_cough'));
+      assert.equal(res.body.spots.reduce((t, i) => (t+i.recovered), 0), count_on_key(responses, 'recovered'));
     });
 
   });

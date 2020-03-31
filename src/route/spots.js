@@ -129,6 +129,19 @@ const process_response = function(req, res, next) {
   });
 }
 
+/**
+ * @api {get} /v1/data/spots/:respondent_uuid retreive clusters of aggregated responses
+ *
+ * @apiDescription Get clusters of responses, like hot spots
+ *
+ * @apiParam {Number} Z Zoom/precision
+ * @apiParam {Number} Top
+ * @apiParam {Number} Left
+ * @apiParam {Number} Bottom
+ * @apiParam {Number} Right
+ *
+ * @apiSuccess
+ */
 router.get('/', validate_query, query_elastic, process_response);
 
 export default router;
