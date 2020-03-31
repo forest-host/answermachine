@@ -25,7 +25,7 @@ const filters = function() {
 // Set bounds to create entries in and to run tests on
 let bounds = {
   'bottom': 50.584,
-  'left': 3.086,
+  'left': 2.086,
   'top': 53.855,
   'right': 7.549
 };
@@ -45,8 +45,8 @@ const generate_entries = function(total) {
         updated_at: faker.date.recent(2),
         respondend_id: faker.random.uuid(),
         location: {
-          'lat': faker.random.number({ max: bounds.top, min: bounds.bottom, precision: 0.001 }),
-          'lon': faker.random.number({ max: bounds.right, min: bounds.left, precision: 0.001 }),
+          'lat': faker.random.number({ max: 53, min: 50, precision: 0.001 }),
+          'lon': faker.random.number({ max: 7, min: 3, precision: 0.001 }),
         },
         ...filters()
       };
@@ -74,15 +74,6 @@ describe("Spots", () => {
    * Add data to Elastic index
    */
   before( async () => {
-    responses = generate_entries(100);
-    await elastic.bulk({
-      index: config.index,
-      refresh: true,
-      body: responses
-    });
-  });
-
-  after( async () => {
     await elastic.deleteByQuery({
       index: config.index,
       body: {
@@ -91,6 +82,15 @@ describe("Spots", () => {
         }
       }
     });
+    responses = generate_entries(10);
+    await elastic.bulk({
+      index: config.index,
+      refresh: true,
+      body: responses
+    }).catch( err => { console.error(err); });
+  });
+
+  after( async () => {
   });
 
   describe("GET /data/spots", () => {
@@ -106,15 +106,8 @@ describe("Spots", () => {
       assert.equal(res.body.errors.right, 'required');
     });
 
-    it("should return error when zoom is below minimum", async () => {
-      let res = await chai.request(server).get('/v1/data/spots?z=1&top=50&left=5&bottom=52&right=4');
-
-      assert.equal(res.status, 400);
-      assert.equal(res.body.errors.z, 'out of bounds');
-    });
-
     it("should return error when zoom is above maximum", async () => {
-      let res = await chai.request(server).get('/v1/data/spots?z=11&top=50&left=5&bottom=52&right=4');
+      let res = await chai.request(server).get('/v1/data/spots?z=14&top=50&left=5&bottom=52&right=4');
 
       assert.equal(res.status, 400);
       assert.equal(res.body.errors.z, 'out of bounds');
@@ -137,7 +130,8 @@ describe("Spots", () => {
     });
 
     it("should return all spots and counts per filter within boundary", async () => {
-      let res = await chai.request(server).get(`/v1/data/spots?z=6&top=${bounds.top}&left=${bounds.left}&bottom=${bounds.bottom}&right=${bounds.right}`);
+      //let res = await chai.request(server).get(`/v1/data/spots?z=1&top=${bounds.top}&left=${bounds.left}&bottom=${bounds.bottom}&right=${bounds.right}`);
+      let res = await chai.request(server).get('/v1/data/spots?z=11&top=54&left=2&bottom=49&right=7');
 
       assert.equal(res.status, 200);
       assert.equal(res.body.hits, (responses.length / 2));

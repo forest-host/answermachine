@@ -20,7 +20,7 @@ let aggregations = Object.keys(questions)
  */
 const validate_query = async function(req, res, next) {
   const expected_params = {
-    'z': { min: 2, max: 15 },
+    'z': { min: 0, max: 13 },
     'top': { min: -90, max: 90 },
     'bottom': { min: -90, max: 90 },
     'left': { min: -180, max: 180 },
@@ -61,26 +61,41 @@ const query_elastic = async function(req, res, next) {
     // @TODO this query can be improved to support better insights over time. For that we need to save seperate records over time instead of updating existing records
     aggregations.recovered = { filter: { exists: { field: 'recovered_at' } } };
 
-    req.tiles = await elastic.search({
+    req.results = await elastic.search({
       index: config.elastic.index,
       size: 0,
       body: {
         aggs: {
-          last_month: {
-            filter: {
-              range: {
-                updated_at: {
-                  gte: "now-30d/d",
-                  lte: "now/d"
-                }
-              }
+          grid: {
+            geotile_grid: {
+              field: 'location',
+              precision: req.query.z
             },
             aggs: {
-              grid: {
-                geotile_grid: {
-                  field: "location",
-                  precision: req.query.z,
-                  bounds: {
+              ...aggregations,
+              spot: { geo_centroid: { field: 'location' } }
+            }
+          }
+        },
+        query: {
+          bool: {
+            must: [
+              {
+                match_all: {}
+              }
+            ],
+            filter: [
+              {
+                range: {
+                  updated_at: {
+                    gte: 'now-30d/d',
+                    lte: 'now/d'
+                  }
+                }
+              },
+              {
+                geo_bounding_box: {
+                  location: {
                     top_left: {
                       lat: req.query.top,
                       lon: req.query.left
@@ -90,14 +105,13 @@ const query_elastic = async function(req, res, next) {
                       lon: req.query.right
                     }
                   }
-                },
-                aggs: aggregations,
+                }
               }
-            }
+            ]
           }
         }
       }
-    }).then( res => res.body.aggregations.last_month);
+    }).then( res => res.body );
 
   } catch(err) {
     console.error(err.body);
@@ -111,21 +125,22 @@ const query_elastic = async function(req, res, next) {
  * Make it happen
  */
 const process_response = function(req, res, next) {
-  let tiles = req.tiles.grid.buckets.map( bucket => {
+  let spots = req.results.aggregations.grid.buckets.map( bucket => {
     let doc_counts = Object.keys(aggregations).reduce((agg, key) => {
       return { ...agg, [key]: bucket[key].doc_count };
     }, {})
 
     return {
       key: bucket.key,
+      location: bucket.spot.location,
       hits: bucket.doc_count,
       ...doc_counts,
     };
   });
 
   res.json({
-    hits: tiles.reduce((t, i) => { return t+i.hits; }, 0),
-    tiles: tiles
+    hits: req.results.hits.total.value,
+    spots: spots
   });
 }
 
