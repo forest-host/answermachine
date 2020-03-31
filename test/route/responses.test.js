@@ -74,10 +74,9 @@ describe("Responses", () => {
 
       assert.equal(res.status, 404);
     })
-    
+
     it('returns last responses for questionaires respondent submitted', async () => {
       let res = await chai.request(server).post('/v1/responses/basic').send(valid_data);
-
       res = await chai.request(server).get(`/v1/responses/basic/${res.body.respondent_uuid}`);
 
       let data = JSON.parse(JSON.stringify(valid_data));
