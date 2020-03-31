@@ -241,7 +241,7 @@ const send_mail = async function(req, res, next) {
 
 const update_elastic = function(req, res, next) {
   if(typeof req.valid_data.location == 'undefined') {
-    next();
+    return next();
   }
 
   let questions = symptotrack.get_questions(req.questionaire);
