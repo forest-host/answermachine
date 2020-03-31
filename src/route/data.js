@@ -140,6 +140,8 @@ const process_response = function(req, res, next) {
     };
   });
 
+  res.header('Cache-Control', 'no-cache');
+
   res.json({
     hits: req.results.hits.total.value,
     spots: spots
