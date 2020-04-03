@@ -260,7 +260,7 @@ const update_elastic = function(req, res, next) {
       doc: {
         created_at: req.response.get('created_at'),
         updated_at: req.response.get('updated_at'),
-        location: { lat: parseFloat(req.valid_data.location[0].toFixed(3)), lon: parseFloat(req.valid_data.location[1].toFixed(3)) },
+        location: { lat: parseFloat(req.valid_data.location[0].toFixed(2)), lon: parseFloat(req.valid_data.location[1].toFixed(2)) },
         ...filters
       },
       doc_as_upsert: true
