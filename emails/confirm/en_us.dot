@@ -1,0 +1,22 @@
+<p>Thank you for participating in the questionnaire. Before adding the symptoms, we ask you to confirm your email address. If the page doesn’t open automatically, copy this link in the address bar of your web browser:</p>
+
+<p>{{=it.link}}</p>
+
+<h3>Why do we ask you to confirm your email address?</h3>
+<p>SymptoTrack does not store  any personal data, this includes your email address. This message is automatically generated when you have completed our questionnaire, without us saving your email address. We don’t send this verification message to confirm your email address, but as a security message. To prevent computer software (also known as bots) from entering fictitious data, we confirm with email verification that the data has been entered by a person.</p>
+
+<p>Do you have more questions about your email confirmation or other security issues? Email us at info@symptotrack.org.</p>
+<p><a href="{{=it.link}}">Jouw persoonlijke bevestiginglink</a></p>
+
+<h3>Contact</h3>
+<p>Do you have questions about the questionnaire or about SymptoTrack? Please contact us.</p>
+
+<p><strong>Mail ons</strong><br />
+info@symptotrack.org</p>
+
+<p>Or get in touch with us on our social media channels<br />
+{{ for (let [ key, value ] of Object.entries(it.socials)) { }}
+<a href="{{=value}}">{{=key}}</a><br />
+{{ } }}
+</p>
+
