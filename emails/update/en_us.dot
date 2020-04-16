@@ -1,0 +1,33 @@
+<p>First of all, we would like to say to you or to the person for whom you answered the questions: get well soon.</p>
+
+<h3>Adjust symptoms or let us know you’re feeling better</h3>
+<p>Are you showing new symptoms in the days after taking this questionnaire? Please, let us know. Click the link down below to update your symptoms. Are your symptoms getting worse? Contact your doctor and follow the instructions of your government.</p>
+
+<p><a href="{{=it.link}}">Your personal link</a></p>
+
+<p>Are you feeling better? Use the same link to let us know you have recovered. For the purposes of this questionnaire, “recovered” means you have had  no symptoms for at least 24 hours. By letting us know you have recovered, we can keep track of how herd immunity is increasing.</p>
+
+<p>Or, help us by answering some extra questions. With this information, we can help scientists learn even more about the virus. Click on the link and open the additional questionnaire.</p>
+
+<h3>Spread the survey, not the virus</h3>
+<p>Help us identify more symptoms by sharing the questionnaire. Do you have symptoms of the virus yourself? Then it is even more important to send the questionnaire to everyone you have seen in the past two weeks.
+</p>
+
+<p>
+{{ for (let [ key, value ] of Object.entries(it.socials)) { }}
+<a href="{{=value}}">{{=key}}</a><br />
+{{ } }}
+</p>
+
+<h3>Contact</h3>
+<p>Do you want to know more about the questionnaire or SymptoTrack? Then don’t hesitate to contact us.
+</p>
+
+<p><strong>Email us</strong><br />
+info@symptotrack.org</p>
+
+<p>Or check out our social media channels <br />
+{{ for (let [ key, value ] of Object.entries(it.socials)) { }}
+<a href="{{=value}}">{{=key}}</a><br />
+{{ } }}
+</p>
