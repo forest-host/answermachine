@@ -88,14 +88,6 @@ const query_elastic = async function(req, res, next) {
             ],
             filter: [
               {
-                range: {
-                  updated_at: {
-                    gte: 'now-30d/d',
-                    lte: 'now/d'
-                  }
-                }
-              },
-              {
                 geo_bounding_box: {
                   location: {
                     top_left: {
